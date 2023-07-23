@@ -308,7 +308,8 @@ func WithTimeout(timeout time.Duration) Option {
 这个属于代码规范问题了.
 
 ## 介绍了linter
-我安利下集成的linter,项目`https://github.com/golangci/golangci-lint`
+linter,静态代码检测.
+安利了集成的linter,项目`https://github.com/golangci/golangci-lint`
 
 
 ## 私货
