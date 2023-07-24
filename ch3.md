@@ -58,10 +58,10 @@ func convert(foos []Foo) []Bar {
 }
 ```
 
-关于append的处理
+### 关于append的处理
 
 
-可读性拉满
+if 可读性拉满
 ```go
 func collectAllUserKeys(cmp Compare, tombstones []tombstoneWithLevel) [][]byte {
     keys := make([][]byte, 0, len(tombstones)*2)
@@ -74,7 +74,7 @@ func collectAllUserKeys(cmp Compare, tombstones []tombstoneWithLevel) [][]byte {
 
 ```
 
-性能拉满
+else 性能拉满
 ```go
 func collectAllUserKeys(cmp Compare, tombstones []tombstoneWithLevel) [][]byte {
     keys := make([][]byte, len(tombstones)*2)
