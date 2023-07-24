@@ -130,9 +130,9 @@ func handleOperations(id string) {
 func getOperations(id string) []float32 { 
 	operations := make([]float32, 0) // 此处已经非nil了
     if id == "" {
-        return operations // 逻辑1 非nil
+        return operations // 逻辑1 误以为是nil,其实此处返回了非nil
 		return nil // 逻辑2 返回nil
-		// 此处应该选择逻辑2,逻辑1有时候人会看走眼
+		// 此处应该选择逻辑2处理才是正确的
     }
     operations=append(operations,1.0)
     return operations // 非nil
