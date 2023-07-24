@@ -296,7 +296,7 @@ func WithTimeout(timeout time.Duration) Option {
 }
 
 ```
-如果你不知道的化,具体可以搜索下`functional options pattern golang`
+如果你不知道的话,具体可以搜索下`functional options pattern golang`
 
 ## 介绍了go标准布局
 作者安利了`https://github.com/golang-standards/project-layout`
