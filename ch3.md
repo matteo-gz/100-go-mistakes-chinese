@@ -151,3 +151,82 @@ func handleOperations(id string) {
 }
 ```
 ### 没有正确copy slice
+下面例子
+
+错误的
+```go
+    src := []int{0, 1, 2}
+	var dst []int
+	copy(dst, src)
+    fmt.Println("dst:", dst,len(dst),cap(dst))
+```
+output:
+> dst: [] 0 0
+
+正确的
+```go
+    src := []int{0, 1, 2}
+dst := make([]int, len(src))
+	copy(dst, src)
+    fmt.Println("dst:", dst)
+```
+output:
+> dst: [0 1 2]
+
+这种语法也能拷贝的
+```go
+    src := []int{0, 1, 2}
+	dst := append([]int(nil), src...)
+	fmt.Println("dst:", dst)
+```
+output:
+> dst: [0 1 2]
+
+### append的注意点
+
+```go
+s1 := []int{1, 2, 3}
+
+	s2 := s1[1:2]
+
+	s3 := append(s2, 10)
+	fmt.Println(s1, s2, s3)
+```
+结果会是怎样呢
+
+或许你会猜测是
+`//  [1,2,3] [2]  [2,10]`
+
+但真实是
+output
+> [1 2 10] [2] [2 10]
+
+因为他们指向同个底层array,当append发生,len没有超出cap时,s1[2]被修改到了.
+
+
+#### 类似同样的现象
+```go
+func main() {
+
+s := []int{1, 2, 3}
+
+// s[:2]// [1,2] but cap is 3
+f(s[:2])
+
+fmt.Println(s) // [1 2 10]
+
+}
+func f(s []int) { 
+	_ = append(s, 10) 
+}
+```
+那么如何保护slice,不受上下文被改动到呢
+- 通过copy函数,使用新变量
+- 利用s[low:high:max] 这种的表达式,cap==max-low
+
+```go
+f(s[:2:2]) // 即s[0:2:2] cap==2-0 ->2
+// 调用时则不会改动原有的s
+```
+
+### slice与内存泄漏
