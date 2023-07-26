@@ -292,6 +292,15 @@ func getMessageType(msg []byte) []byte {
 
 第一种 无法垃圾回收
 ```go
+
+type Foo struct{ v []byte }
+
+func printAlloc() {
+var m runtime.MemStats
+runtime.ReadMemStats(&m)
+fmt.Printf("%d KB\n", m.Alloc/1024)
+}
+
 func a1() {
 	foos := make([]Foo, 1_000)
 	printAlloc()
