@@ -230,3 +230,118 @@ f(s[:2:2]) // 即s[0:2:2] cap==2-0 ->2
 ```
 
 ### slice与内存泄漏
+
+例子
+```go
+func consumeMessages() {
+	i := 1000
+	var m runtime.MemStats
+	for {
+
+		runtime.ReadMemStats(&m)
+
+		fmt.Println("Allocated memory (bytes):", m.Alloc)
+		// getMessageType 2199560
+		// getMessageType2 1199236608
+		if i == 0 {
+			break
+		}
+		i--
+		msg := receiveMessage()
+		storeMessageType(getMessageType2(msg))
+	}
+	fmt.Println("ok")
+}
+func receiveMessage() []byte {
+	s := "1"
+	b := strings.Repeat(s, 100*10000)
+	return []byte(b)
+}
+
+var a [][]byte
+
+func storeMessageType(b []byte) {
+	a = append(a, b)
+}
+func getMessageType(msg []byte) []byte {
+	return msg[:5]
+}
+func getMessageType2(msg []byte) []byte {
+	msgType := make([]byte, 5)
+	copy(msgType, msg) // 新的变量
+	return msgType
+}
+```
+`getMessageType`与`getMessageType2`相差内存占有不一样
+
+那么`getMessageType`下面这种处理有效吗?
+```go
+func getMessageType(msg []byte) []byte {
+	return msg[:5:5] 
+}
+```
+答案是无效
+
+### slice与指针
+第一种 无法垃圾回收
+```go
+func a1() {
+	foos := make([]Foo, 1_000)
+	printAlloc()
+	for i := 0; i < len(foos); i++ {
+		foos[i] = Foo{
+			v: make([]byte, 1024*1024),
+		}
+	}
+	printAlloc()
+	two := keepFirstTwoElementsOnly(foos)
+	runtime.GC()
+	printAlloc()
+	runtime.KeepAlive(two) // 此时 foos 底层数组被强行留着
+}
+func keepFirstTwoElementsOnly(foos []Foo) []Foo {
+	return foos[:2] 
+}
+```
+> 104 KB
+> 
+> 1024108 KB
+> 
+> 1024109 KB
+
+第二种 可以回收
+```go
+func keepFirstTwoElementsOnly2(foos []Foo) []Foo {
+	res := make([]Foo, 2)
+	// 消耗成本取决于cap(res)的大小
+	copy(res, foos)
+	return res
+}
+```
+
+> 104 KB
+>
+> 1024110 KB
+>
+> 2159 KB
+
+第三种 也可以垃圾回收
+```go
+func keepFirstTwoElementsOnly3(foos []Foo) []Foo {
+	// 消耗成本取决于len(foos)的大小
+	for i := 2; i < len(foos); i++ {
+		foos[i].v = nil
+	}
+	return foos[:2]
+}
+
+```
+> 104 KB
+>
+> 1024107 KB
+>
+> 2157 KB
+
+关于第二种和第三种做法,哪种好取决于你的场景以及做的基准测试.
+
+## map初始化

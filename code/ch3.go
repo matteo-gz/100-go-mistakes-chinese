@@ -2,29 +2,33 @@ package main
 
 import (
 	"fmt"
-	"math"
+	"runtime"
+	"strings"
 )
 
 func main() {
-	fmt.Println(100 + 010)
-	fmt.Println(100 + 0o10)
-	fmt.Println(100+010 == 100+0o10)
-	fmt.Println(0b11)
+	//fmt.Println(100 + 010)
+	//fmt.Println(100 + 0o10)
+	//fmt.Println(100+010 == 100+0o10)
+	//fmt.Println(0b11)
+	//
+	//var counter int32 = math.MaxInt32
+	//fmt.Printf("counter=%d\n", counter)
+	//counter++
+	//fmt.Printf("counter=%d\n", counter)
+	//
+	//var n float32 = 1.0001
+	//fmt.Println(n * n)
+	//
+	//sl()
+	//sl1()
+	//sl2()
+	//sl3()
+	//sl4()
+	//sl5()
 
-	var counter int32 = math.MaxInt32
-	fmt.Printf("counter=%d\n", counter)
-	counter++
-	fmt.Printf("counter=%d\n", counter)
-
-	var n float32 = 1.0001
-	fmt.Println(n * n)
-
-	sl()
-	sl1()
-	sl2()
-	sl3()
-	sl4()
-	sl5()
+	//consumeMessages()
+	a1()
 }
 func sl() {
 	src := []int{0, 1, 2}
@@ -74,4 +78,79 @@ func sl5() {
 	f(s[:2:2])
 
 	fmt.Println(s) // [1 2 10]
+}
+
+func consumeMessages() {
+	i := 1000
+	var m runtime.MemStats
+	for {
+
+		runtime.ReadMemStats(&m)
+
+		fmt.Println("Allocated memory (bytes):", m.Alloc)
+		// getMessageType 2199560
+		// getMessageType 1199236608
+		if i == 0 {
+			break
+		}
+		i--
+		msg := receiveMessage()
+		storeMessageType(getMessageType2(msg))
+	}
+	fmt.Println("ok")
+}
+func receiveMessage() []byte {
+	s := "1"
+	b := strings.Repeat(s, 100*10000)
+	return []byte(b)
+}
+
+var a [][]byte
+
+func storeMessageType(b []byte) {
+	a = append(a, b)
+}
+func getMessageType(msg []byte) []byte {
+	return msg[:5]
+}
+func getMessageType2(msg []byte) []byte {
+	msgType := make([]byte, 5)
+	copy(msgType, msg)
+	return msgType
+}
+
+type Foo struct{ v []byte }
+
+func printAlloc() {
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+	fmt.Printf("%d KB\n", m.Alloc/1024)
+}
+func a1() {
+	foos := make([]Foo, 1_000)
+	printAlloc()
+	for i := 0; i < len(foos); i++ {
+		foos[i] = Foo{
+			v: make([]byte, 1024*1024),
+		}
+	}
+	printAlloc()
+	two := keepFirstTwoElementsOnly3(foos)
+	runtime.GC()
+	printAlloc()
+	runtime.KeepAlive(two)
+}
+func keepFirstTwoElementsOnly(foos []Foo) []Foo {
+	return foos[:2]
+}
+func keepFirstTwoElementsOnly2(foos []Foo) []Foo {
+	res := make([]Foo, 2)
+	copy(res, foos)
+	return res
+}
+func keepFirstTwoElementsOnly3(foos []Foo) []Foo {
+	for i := 2; i < len(foos); i++ {
+		foos[i].v = nil
+	}
+	return foos[:2]
 }
