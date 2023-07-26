@@ -28,7 +28,8 @@ func main() {
 	//sl5()
 
 	//consumeMessages()
-	a1()
+	//a1()
+	mapGc()
 }
 func sl() {
 	src := []int{0, 1, 2}
@@ -153,4 +154,23 @@ func keepFirstTwoElementsOnly3(foos []Foo) []Foo {
 		foos[i].v = nil
 	}
 	return foos[:2]
+}
+
+func mapGc() {
+	n := 1_000_000
+	m := make(map[int][128]byte)
+	printAlloc()
+	for i := 0; i < n; i++ {
+		m[i] = randBytes()
+	}
+	printAlloc()
+	for i := 0; i < n; i++ {
+		delete(m, i)
+	}
+	runtime.GC()
+	printAlloc()
+	runtime.KeepAlive(m)
+}
+func randBytes() [128]byte {
+	return [128]byte{}
 }

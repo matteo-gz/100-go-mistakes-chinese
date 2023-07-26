@@ -1,6 +1,6 @@
 # 数据类型
 
-## 八进制混淆
+## `#17:` 八进制混淆
 即代码相对人类可读性而言
 ```go
 fmt.Println(100 + 010)  //结果 108
@@ -15,7 +15,7 @@ fmt.Println(100+010 == 100+0o10) // true
 
 虚数  使用`i`后缀,例如 `3i`
 
-## 整数溢出
+## `#18:` 整数溢出
 当一个数据超过范围,每次需要增加额外逻辑来判断处理是否溢出。
 我个人觉得是一种损耗,应该是你数据类型范围定义错误了。
 
@@ -29,7 +29,7 @@ fmt.Println(100+010 == 100+0o10) // true
 > 
 > counter=-2147483648
 
-## 浮点数理解
+## `#19:` 浮点数理解
 具体可以搜索浮点数溢出问题
 ```go
 var n float32 = 1.0001
@@ -38,10 +38,10 @@ fmt.Println(n * n) // 应该是1.00020001
 但是结果是
 >  1.0002
 
-## slice底层结构的理解
+## `#20:` slice底层结构的理解
 即len与cap的关系的理解,可以查阅go原理讲解的书籍
 
-### slice 初始化问题
+### `#21:` slice 初始化问题
 ```go
 func convert(foos []Foo) []Bar {
 	// 第一种低效的
@@ -88,7 +88,7 @@ func collectAllUserKeys(cmp Compare, tombstones []tombstoneWithLevel) [][]byte {
 ```
 2种写法见仁见智,如果调用次数多,成为性能瓶颈情况下.还是为了团队沟通,让代码可读性变高.
 
-### nil与 empty slices 区别
+### `#22:`nil与 empty slices 区别
 - len==0 就是empty slices
 - slice==nil 就是 nil slice
 
@@ -118,7 +118,7 @@ customer2 := customer{ ID: "bar", Operations: s2, }
 ```
 > {"ID":"bar","Operations":[]}
 
-### nil处理不当的bug
+### `#23:`nil处理不当的bug
 ```go
 func handleOperations(id string) { 
 	operations := getOperations(id) 
@@ -150,7 +150,7 @@ func handleOperations(id string) {
 	} 
 }
 ```
-### 没有正确copy slice
+### `#24:`没有正确copy slice
 下面例子
 
 错误的
@@ -182,7 +182,7 @@ output:
 output:
 > dst: [0 1 2]
 
-### append的注意点
+### `#25:`append的注意点
 
 ```go
 s1 := []int{1, 2, 3}
@@ -229,7 +229,7 @@ f(s[:2:2]) // 即s[0:2:2] cap==2-0 ->2
 // 调用时则不会改动原有的s
 ```
 
-### slice与内存泄漏
+### `#26:`slice与内存泄漏
 
 例子 我们调用`consumeMessages`
 ```go
@@ -360,4 +360,56 @@ func keepFirstTwoElementsOnly3(foos []Foo) []Foo {
 
 关于第二种和第三种做法,哪种好取决于你的场景以及做的基准测试.
 
-## map初始化
+## `#27:` map初始化
+```go
+// 有初始化容量的
+m := make(map[string]int, 1_000_000)
+```
+```go
+BenchmarkMapWithoutSize-4  6   227413490 ns/op
+BenchmarkMapWithSize-4    13    91174193 ns/op
+```
+作者压测后得出有初始化数量更高效
+
+文中解释了这一现象原因:一个合理数量的初始化,不用动态创建bucket以及重新平衡bucket,从而高效
+
+### `#28:` map与内存泄漏
+
+例子
+
+```go
+func mapGc() {
+	n := 1_000_000
+	m := make(map[int][128]byte)
+	printAlloc()
+	for i := 0; i < n; i++ {
+		m[i] = randBytes()
+	}
+	printAlloc()
+	for i := 0; i < n; i++ {
+		delete(m, i)
+	}
+	runtime.GC()
+	printAlloc()
+	runtime.KeepAlive(m)
+}
+func randBytes() [128]byte {
+	return [128]byte{}
+}
+```
+> 104 KB
+>
+> 472504 KB
+>
+>  300441 KB
+
+结论是垃圾回收了,但是没有想象中的回收的多,此处涉及map的底层数据结构。
+
+存在的bucket没变化,只是里面的slots变成了0,map只能不断的增长,拥有更多的bucket,而不会缩小
+
+探讨:
+一场活动导致的流量高峰,高峰过后因为map的占用内存导致服务器的内存处于高位,而回收不太理想
+- 每隔一小时复制到新map,丢弃旧map
+- 优化数据类型 `map[int][128]byte`变成`map[int]*[128]byte`,改为指针能节省部分内存
+
+## `#29:`判断对等关系
