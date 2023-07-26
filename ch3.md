@@ -231,7 +231,7 @@ f(s[:2:2]) // 即s[0:2:2] cap==2-0 ->2
 
 ### slice与内存泄漏
 
-例子
+例子 我们调用`consumeMessages`
 ```go
 func consumeMessages() {
 	i := 1000
@@ -273,16 +273,23 @@ func getMessageType2(msg []byte) []byte {
 }
 ```
 `getMessageType`与`getMessageType2`相差内存占有不一样
+> getMessageType 2199560
+> 
+>  getMessageType2 1199236608
+`getMessageType2`方法是有效的.
 
-那么`getMessageType`下面这种处理有效吗?
+那么如果`getMessageType`下面这种处理有效吗?
 ```go
 func getMessageType(msg []byte) []byte {
-	return msg[:5:5] 
+	return msg[:5:5] // 之前的写法是 msg[:5]
 }
 ```
-答案是无效
+答案是改成`msg[:5:5]`也是无效处理
 
 ### slice与指针
+例子
+我们调用`a1`
+
 第一种 无法垃圾回收
 ```go
 func a1() {
