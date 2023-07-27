@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"reflect"
 	"runtime"
 	"strings"
 )
@@ -29,7 +30,21 @@ func main() {
 
 	//consumeMessages()
 	//a1()
-	mapGc()
+	//mapGc()
+	eq()
+}
+func eq() {
+	fmt.Println(struct{ id string }{"1"} == struct{ id string }{"1"})
+	type customer struct {
+		id         string
+		operations []float64
+	}
+	var c1 any = 1
+	var c12 any = 1
+	fmt.Println(c1 == c12)
+	var c11 any = customer{id: "x", operations: []float64{1.}}
+	var c13 any = customer{id: "x", operations: []float64{1}}
+	fmt.Println(reflect.DeepEqual(c11, c13))
 }
 func sl() {
 	src := []int{0, 1, 2}

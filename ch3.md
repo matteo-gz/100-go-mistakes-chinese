@@ -413,3 +413,7 @@ func randBytes() [128]byte {
 - 优化数据类型 `map[int][128]byte`变成`map[int]*[128]byte`,改为指针能节省部分内存
 
 ## `#29:`判断对等关系
+
+`==` 不能用于slice map
+
+`reflect.DeepEqual() ` 可以做到,但是性能很一般
