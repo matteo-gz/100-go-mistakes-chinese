@@ -1,31 +1,33 @@
 # 第2章:代码与项目组织
 
 ## `#1:`变量重名
+
 ```go
 package main
 
 import "fmt"
 
 func main() {
-	// 外部作用域变量
-	x := 10
+ // 外部作用域变量
+ x := 10
 
-	// 这是一个新的代码块，内部作用域
-	{
-		// 在内部作用域中重名了一个变量x
-		x := 5
-		fmt.Println("内部作用域中的x:", x) // 输出：内部作用域中的x: 5
-	}
+ // 这是一个新的代码块，内部作用域
+ {
+  // 在内部作用域中重名了一个变量x
+  x := 5
+  fmt.Println("内部作用域中的x:", x) // 输出：内部作用域中的x: 5
+ }
 
-	// 注意：外部作用域中的变量x没有被修改，因为它被内部作用域中的x所掩盖
-	fmt.Println("外部作用域中的x:", x) // 输出：外部作用域中的x: 10
+ // 注意：外部作用域中的变量x没有被修改，因为它被内部作用域中的x所掩盖
+ fmt.Println("外部作用域中的x:", x) // 输出：外部作用域中的x: 10
 }
 
 ```
+
 output:
 >
 > 内部作用域中的x: 5
-> 
+>
 > 外部作用域中的x: 10
 >
 
@@ -35,25 +37,29 @@ output:
 ![绿色变量](./code/ch2.png)
 
 用一个临时变量tmpX来过渡,防止2个地方的`x`变量指向的混淆
+
 ```go
 x:=10
 {
-	tmpX:=5
-	x=tmpX
+ tmpX:=5
+ x=tmpX
 }
 ```
 
 要么不用`:=`
+
 ```go
 var x int
 x=10
 {
-	x=5
+ x=5
 }
 ```
 
 ## `#2:`代码嵌套
+
 即`卫语句`概念,不懂的可以wiki下
+
 ```
 if（it == 活的）{
  
@@ -87,7 +93,9 @@ if（it == 活的）{
 
 }
 ```
+
 改成如下
+
 ```
 if （it ！= 活的）{return 不喜欢}
 
@@ -101,48 +109,51 @@ if（其他任何情况）{return 不喜欢}
 ```
 
 ## `#3:`init函数使用场景
-例子1 
+
+例子1
 
 init与其他函数执行顺序
+
 ```go
 package main
 
 import "fmt"
 var va = func() int {
-	fmt.Println("var")
-	return 1
+ fmt.Println("var")
+ return 1
 }()
 
 func init() {
-	fmt.Println("init")
+ fmt.Println("init")
 }
 func main() {
-	fmt.Println("main")
+ fmt.Println("main")
 }
 ```
+
 output:
 >
 > var
-> 
+>
 > init
-> 
+>
 > main
 
-
 例子2
+
 ```go
 
 func main(){
-	redis.xx
+ redis.xx
 }
 ```
+
 先载入redis的init,然后是main的init
 
 例子3
 
 import多个包时,根据文件字母顺序载入init,比如b.go,a.go.
 先执行a.go的init
-
 
 例子4
 
@@ -156,10 +167,8 @@ func init() {
 fmt.Println("init2")
 }
 ```
+
 先执行第一个init.
-
-
-
 
 - 初始化其他包的init
 
@@ -169,15 +178,18 @@ _ "foo"
 )
 
 ```
+
 上面例子中foo包的init被执行了
 
 - init函数无法被其他函数调用
 
-
 ### 使用场景
+
 #### 反例
+
 数据库连接例子写在init函数里可能是不合适的
-``` 
+
+```
 // 伪代码
 var db *DB
 
@@ -188,31 +200,37 @@ fun init(){
     }
 }
 ```
+
 - init函数没有返回值,只能panic去中断,而数据库返回的error,只能暴力处理
 - 考虑到单元测试场景,init是首次被加载的,包里的函数不是每个测试时都需要数据库连接这个依赖项
 - 使得变量全局化了,过于暴露了数据库这个变量
 
 #### 正例
+
 ```go
 func init(){
 http.HandleFunc("/blog/", redirect)
 }
 ```
+
 - error的handle还是正常的
 - 单元测试没有变复杂
 
 ## `#4:`过渡封装函数来设置变量值
 
 或许你见过这种函数对
+
 ```go
 func setAge(){ //setter
-	
+ 
 }
 func Age(){ // getter
-	
+ 
 }
 ```
+
 他们的使用好处是
+
 - 统一管理
 - 可以在函数内部对变量作出规则限制
 - 很方便植入断点
@@ -240,47 +258,52 @@ func Age(){ // getter
 入参可以接受接口,宽进严出.
 
 ## `#8:`any类型使用
+
 any使得静态语言变得和动态语言一样,不确定里面的信息.
 除非在json encode和decode场景这种,尽量减少用any,因为他代表着信息表征减少.
 
 ## `#9:`泛型使用
 
 常见:
+
 - 比如slice里面的元素合并
 
 作者说了句,go使用上已经很久没用泛型了(因为之前没引入泛型).泛型使用,见仁见智。
 
 ## `#10:`内嵌类型
+
 ```go
 type a struct {
-	sync.Mutex
+ sync.Mutex
 }
 
 func useA() {
-	a1 := new(a)
-	a1.Lock()
+ a1 := new(a)
+ a1.Lock()
 }
 ```
+
 a1.Lock 对于使用者过于迷惑
+
 ```go
 type a struct {
-	mu sync.Mutex
+ mu sync.Mutex
 }
 
 func useA() {
-	a1 := new(a)
-	a1.mu.Lock()
+ a1 := new(a)
+ a1.mu.Lock()
 }
 ```
+
 a1.mu.Lock 这样对于使用者就不会感到迷惑了。
-
-
 
 对于`a.c` 还是`a.b.c`,哪种更好,要具体情况具体分析.
 
 ## `#11:`介绍了func option 模式优点
 
 帮助你联想的代码
+
 ```go
 
 func WithPort(port int) Option {
@@ -296,26 +319,32 @@ func WithTimeout(timeout time.Duration) Option {
 }
 
 ```
+
 如果你不知道的话,具体可以搜索下`functional options pattern golang`
 
 ## `#12:`介绍了go标准布局
+
 作者安利了`https://github.com/golang-standards/project-layout`
 
 ## `#13:`包名定义
+
 减少这种`common` `utils` `base`包的定义,这里涉及了代码规范问题,见仁见智.
 
 ## `#14:`包名冲突
+
 使用别名解决
 
 ## `#15:`代码文档
+
 要写代码文档,并知道go官方的`go doc`工具
 
 这个属于代码规范问题了.
 
 ## `#16:`介绍了linter
+
 linter,静态代码检测.
 安利了集成的linter,项目`https://github.com/golangci/golangci-lint`
 
-
 ## 私货
+
 这里安利下uber公司的代码规范 `https://github.com/xxjwxc/uber_go_guide_cn`
