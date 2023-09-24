@@ -49,3 +49,5 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v2
+        with:
+          personal_token: ${{ secrets.ACTION_ACCESS_TOKEN }}    # 发布到其他repo需要提供上面生成的personal access token
