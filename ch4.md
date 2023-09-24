@@ -70,6 +70,6 @@ accounts[i].balance += 1000
 `accounts := []*account{}`
 作者不是很赞同,在`#91`时会提及
 
-## `#31:`
+## `#31:todo`
 
 {% endraw %}
