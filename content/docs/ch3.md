@@ -1,6 +1,9 @@
-# 数据类型
+---
+title: 3. 数据类型
+---
 
-## `#17:` 八进制混淆
+
+## 17 八进制混淆
 
 即代码相对人类可读性而言
 
@@ -18,7 +21,7 @@ fmt.Println(100+010 == 100+0o10) // true
 
 虚数  使用`i`后缀,例如 `3i`
 
-## `#18:` 整数溢出
+## 18 整数溢出
 
 当一个数据超过范围,每次需要增加额外逻辑来判断处理是否溢出。
 我个人觉得是一种损耗,应该是你数据类型范围定义错误了。
@@ -34,7 +37,7 @@ fmt.Println(100+010 == 100+0o10) // true
 >
 > counter=-2147483648
 
-## `#19:` 浮点数理解
+## 19 浮点数理解
 
 具体可以搜索浮点数溢出问题
 
@@ -46,11 +49,12 @@ fmt.Println(n * n) // 应该是1.00020001
 但是结果是
 > 1.0002
 
-## `#20:` slice底层结构的理解
+## 20 slice底层结构的理解
 
-即len与cap的关系的理解,可以查阅go原理讲解的书籍
 
-### `#21:` slice 初始化问题
+即len与cap的关系的理解,可以查阅go原理讲解的书籍(碍于篇幅过长)
+
+## 21 slice 初始化问题
 
 ```go
 func convert(foos []Foo) []Bar {
@@ -100,7 +104,7 @@ func collectAllUserKeys(cmp Compare, tombstones []tombstoneWithLevel) [][]byte {
 
 2种写法见仁见智,如果调用次数多,成为性能瓶颈情况下.还是为了团队沟通,让代码可读性变高.
 
-### `#22:`nil与 empty slices 区别
+## 22 nil与 empty slices 区别
 
 - len==0 就是empty slices
 - slice==nil 就是 nil slice
@@ -135,7 +139,7 @@ customer2 := customer{ ID: "bar", Operations: s2, }
 
 > {"ID":"bar","Operations":[]}
 
-### `#23:`nil处理不当的bug
+## 23 nil处理不当的bug
 
 ```go
 func handleOperations(id string) { 
@@ -171,7 +175,7 @@ func handleOperations(id string) {
 }
 ```
 
-### `#24:`没有正确copy slice
+## 24 没有正确copy slice
 
 下面例子
 
@@ -210,7 +214,7 @@ output:
 output:
 > dst: [0 1 2]
 
-### `#25:`append的注意点
+## 25 append的注意点
 
 ```go
 s1 := []int{1, 2, 3}
@@ -260,7 +264,7 @@ f(s[:2:2]) // 即s[0:2:2] cap==2-0 ->2
 // 调用时则不会改动原有的s
 ```
 
-### `#26:`slice与内存泄漏
+## 26 slice与内存泄漏
 
 例子 我们调用`consumeMessages`
 
@@ -401,7 +405,7 @@ func keepFirstTwoElementsOnly3(foos []Foo) []Foo {
 
 关于第二种和第三种做法,哪种好取决于你的场景以及做的基准测试.
 
-## `#27:` map初始化
+## 27 map初始化
 
 ```go
 // 有初始化容量的
@@ -417,7 +421,7 @@ BenchmarkMapWithSize-4    13    91174193 ns/op
 
 文中解释了这一现象原因:一个合理数量的初始化,不用动态创建bucket以及重新平衡bucket,从而高效
 
-### `#28:` map与内存泄漏
+## 28 map与内存泄漏
 
 例子
 
@@ -458,7 +462,7 @@ func randBytes() [128]byte {
 - 每隔一小时复制到新map,丢弃旧map
 - 优化数据类型 `map[int][128]byte`变成`map[int]*[128]byte`,改为指针能节省部分内存
 
-## `#29:`判断对等关系
+## 29 判断对等关系
 
 `==` 不能用于slice map
 

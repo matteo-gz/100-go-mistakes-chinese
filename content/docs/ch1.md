@@ -1,4 +1,6 @@
-# 第一章:易学难精的GO
+---
+title: 1. 易学难精的GO
+---
 
 go官方的答疑 <https://go.dev/doc/faq>
 

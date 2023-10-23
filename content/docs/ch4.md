@@ -1,8 +1,7 @@
-# 控制结构
-
-{% raw %}
-
-## `#30:`元素在循环中复制
+---
+title: 4. 控制结构
+---
+## 30 元素在循环中复制
 
 `range` 可作用于 string array 指针数组 slice map 接收chan
 
@@ -34,7 +33,7 @@ index=1
 index=2
 ```
 
-## 开始陷阱挑战
+### 开始陷阱挑战
 
 ```go
 accounts := []account{{balance: 100.}, {balance: 200.}, {balance: 300.}}
@@ -70,6 +69,6 @@ accounts[i].balance += 1000
 `accounts := []*account{}`
 作者不是很赞同,在`#91`时会提及
 
-## `#31:todo`
+## 31 忽略如何在range循环中计算参数
 
-{% endraw %}
+
