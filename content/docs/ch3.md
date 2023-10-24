@@ -5,7 +5,7 @@ title: 3. 数据类型
 
 ## 17 八进制混淆
 
-即代码相对人类可读性而言
+即代码相对人类可读性而言.
 
 ```go
 fmt.Println(100 + 010)  //结果 108
@@ -13,18 +13,18 @@ fmt.Println(100 + 0o10) //结果 108
 fmt.Println(100+010 == 100+0o10) // true
 ```
 
-八进制表达最好用`0o`前缀
+八进制表达最好用`0o`前缀.
 
-二进制用`0b`前缀
+二进制用`0b`前缀.
 
-十六进制用`0x`前缀
+十六进制用`0x`前缀.
 
-虚数  使用`i`后缀,例如 `3i`
+虚数  使用`i`后缀,例如 `3i`.
 
 ## 18 整数溢出
 
-当一个数据超过范围,每次需要增加额外逻辑来判断处理是否溢出。
-我个人觉得是一种损耗,应该是你数据类型范围定义错误了。
+当一个数据超过范围,每次需要增加额外逻辑来判断处理是否溢出.
+个人觉得是一种损耗,属于数据范围应用不当.
 
 ```go
  var counter int32 = math.MaxInt32
@@ -39,7 +39,7 @@ fmt.Println(100+010 == 100+0o10) // true
 
 ## 19 浮点数理解
 
-具体可以搜索浮点数溢出问题
+具体可以搜索浮点数溢出问题.
 
 ```go
 var n float32 = 1.0001
@@ -52,7 +52,7 @@ fmt.Println(n * n) // 应该是1.00020001
 ## 20 slice底层结构的理解
 
 
-即len与cap的关系的理解,可以查阅go原理讲解的书籍(碍于篇幅过长)
+即len与cap的关系的理解.
 
 ## 21 slice 初始化问题
 
@@ -74,7 +74,7 @@ func convert(foos []Foo) []Bar {
 
 ### 关于append的处理
 
-if 可读性拉满
+偏向可读性做法:
 
 ```go
 func collectAllUserKeys(cmp Compare, tombstones []tombstoneWithLevel) [][]byte {
@@ -88,7 +88,7 @@ func collectAllUserKeys(cmp Compare, tombstones []tombstoneWithLevel) [][]byte {
 
 ```
 
-else 性能拉满
+偏向性能做法:
 
 ```go
 func collectAllUserKeys(cmp Compare, tombstones []tombstoneWithLevel) [][]byte {
@@ -191,6 +191,8 @@ func handleOperations(id string) {
 output:
 > dst: [] 0 0
 
+---
+
 正确的
 
 ```go
@@ -202,6 +204,8 @@ dst := make([]int, len(src))
 
 output:
 > dst: [0 1 2]
+
+---
 
 这种语法也能拷贝的
 
@@ -225,18 +229,18 @@ s1 := []int{1, 2, 3}
  fmt.Println(s1, s2, s3)
 ```
 
-结果会是怎样呢
+结果会是怎样呢?
 
-或许你会猜测是
+或许你会猜测是:
 `//  [1,2,3] [2]  [2,10]`
 
-但真实是
-output
+但真实的output:
+
 > [1 2 10] [2] [2 10]
 
 因为他们指向同个底层array,当append发生,len没有超出cap时,s1[2]被修改到了.
 
-#### 类似同样的现象
+**类似同样的现象**
 
 ```go
 func main() {
@@ -254,7 +258,7 @@ func f(s []int) {
 }
 ```
 
-那么如何保护slice,不受上下文被改动到呢
+那么如何保护slice,不受上下文被改动到呢?
 
 - 通过copy函数,使用新变量
 - 利用s[low:high:max] 这种的表达式,cap==max-low
@@ -325,7 +329,9 @@ func getMessageType(msg []byte) []byte {
 
 答案是改成`msg[:5:5]`也是无效处理
 
-### slice与指针
+---
+
+**slice与指针**
 
 例子
 我们调用`a1`
@@ -367,6 +373,8 @@ func keepFirstTwoElementsOnly(foos []Foo) []Foo {
 >
 > 1024109 KB
 
+---
+
 第二种 可以回收
 
 ```go
@@ -383,6 +391,8 @@ func keepFirstTwoElementsOnly2(foos []Foo) []Foo {
 > 1024110 KB
 >
 > 2159 KB
+
+---
 
 第三种 也可以垃圾回收
 
@@ -417,9 +427,9 @@ BenchmarkMapWithoutSize-4  6   227413490 ns/op
 BenchmarkMapWithSize-4    13    91174193 ns/op
 ```
 
-作者压测后得出有初始化数量更高效
+作者压测后得出有初始化数量更高效.
 
-文中解释了这一现象原因:一个合理数量的初始化,不用动态创建bucket以及重新平衡bucket,从而高效
+文中解释了这一现象原因:一个合理数量的初始化,不用动态创建bucket以及重新平衡bucket,从而高效.
 
 ## 28 map与内存泄漏
 
@@ -452,7 +462,7 @@ func randBytes() [128]byte {
 >
 > 300441 KB
 
-结论是垃圾回收了,但是没有想象中的回收的多,此处涉及map的底层数据结构。
+结论是垃圾回收了,但是没有想象中的回收的多,此处涉及map的底层数据结构.
 
 存在的bucket没变化,只是里面的slots变成了0,map只能不断的增长,拥有更多的bucket,而不会缩小
 

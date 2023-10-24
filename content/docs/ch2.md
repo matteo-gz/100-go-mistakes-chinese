@@ -2,9 +2,7 @@
 title: 2. 代码与项目组织
 ---
 
-## 1 变量重名
-
-
+## 1 变量阴影
 
 ```go
 package main
@@ -28,7 +26,7 @@ func main() {
 
 ```
 
-output:
+运行之后output:
 >
 > 内部作用域中的x: 5
 >
@@ -37,12 +35,12 @@ output:
 {{< hint info >}}
 解决办法
 {{< /hint >}}
-这年头,IDE goland 已经能识别这个风险了,新作用域内的x变量会变成绿色字体的
+IDE GoLand 能识别这个风险,新作用域内的x变量会变成绿色字体.
 ![绿色变量](../ch2.png)
 
 {{< tabs "uniqueid" >}}
 {{< tab "临时变量" >}}
-用一个临时变量tmpX来过渡,防止2个地方的`x`变量指向的混淆
+用一个临时变量tmpX来过渡,防止2个地方的`x`变量指向的混淆.
 ```go
 x:=10
 {
@@ -70,8 +68,9 @@ x=10
 
 ## 2 代码嵌套
 
-即`卫语句`概念,不懂的可以wiki下
+涉及`卫语句`概念.
 
+下面是多层嵌套例子:
 ```
 if（it == 活的）{
  
@@ -106,7 +105,7 @@ if（it == 活的）{
 }
 ```
 
-改成如下
+改成如下精简的:
 
 ```
 if （it ！= 活的）{return 不喜欢}
@@ -164,20 +163,20 @@ func main(){
 }
 ```
 
-先载入redis的init,然后是main的init
+先载入redis的init,然后是main的init.
 
 {{< hint info >}}
 import多个包的顺序
 {{< /hint >}}
 
-import多个包时,根据文件字母顺序载入init,比如b.go,a.go.
-先执行a.go的init
+import多个包时,根据文件字母顺序载入init,比如`b.go`,`a.go`.
+先执行`a.go`的init.
 
 {{< hint info >}}
 多次定义init函数
 {{< /hint >}}
 
-init函数可以多处定义
+init函数可以多处定义.
 
 ```go
 func init() {
@@ -201,7 +200,7 @@ _ "foo"
 
 ```
 
-上面例子中foo包的init被执行了
+上面例子中foo包的init被执行了.
 {{< hint info >}}
 init函数无法被其他函数调用
 {{< /hint >}}
@@ -211,9 +210,9 @@ init函数无法被其他函数调用
 **使用场景**
 
 
-**反例**
+反例:
 
-数据库连接例子写在init函数里可能是不合适的
+数据库连接例子写在init函数里可能是不合适的.
 
 ```
 // 伪代码
@@ -231,7 +230,7 @@ fun init(){
 - 考虑到单元测试场景,init是首次被加载的,包里的函数不是每个测试时都需要数据库连接这个依赖项
 - 使得变量全局化了,过于暴露了数据库这个变量
 
-**正例**
+正例
 
 ```go
 func init(){
@@ -261,11 +260,11 @@ func Age(){ // getter
 - 可以在函数内部对变量作出规则限制
 - 很方便植入断点
 
-如果前期简单需求,请不要对变量过度封装
+如果前期简单需求,请不要对变量过度封装.
 
 ## 5 接口污染
 
-接口越大,抽象越弱
+接口越大,抽象越弱.
 
 定义接口规则
 
@@ -275,15 +274,15 @@ func Age(){ // getter
 
 不要去设计接口,而是发现他们.
 
-接口也是有cpu消耗成本的.
+接口也是有CPU消耗成本的.
 
 ## 6 接口定义处
-接口的定义尽量在消费端,而不是在生产端
+接口的定义尽量在消费端,而不是在生产端.
 
 ## 7 接口使用规则
-函数返回对象尽量不要用interface,否则别人使用时,需要去看你的代码
+函数返回对象尽量不要用interface,否则别人使用时,需要去看你的代码.
 
-入参可以接受接口,宽进严出.
+函数入参可以接受interface,宽进严出.
 
 ## 8 any类型使用
 
@@ -296,7 +295,7 @@ any使得静态语言变得和动态语言一样,不确定里面的信息.
 
 - 比如slice里面的元素合并
 
-作者说了句,go使用上已经很久没用泛型了(因为之前没引入泛型).泛型使用,见仁见智。
+泛型使用,见仁见智.
 
 ## 10 内嵌类型
 
@@ -311,7 +310,7 @@ func useA() {
 }
 ```
 
-a1.Lock 对于使用者过于迷惑
+`a1.Lock` 对于使用者过于迷惑.
 
 ```go
 type a struct {
@@ -324,13 +323,13 @@ func useA() {
 }
 ```
 
-a1.mu.Lock 这样对于使用者就不会感到迷惑了。
+`a1.mu.Lock` 这样对于使用者就不会感到迷惑了.
 
 对于`a.c` 还是`a.b.c`,哪种更好,要具体情况具体分析.
 
 ## 11 介绍了func option 模式优点
 
-帮助你联想的代码
+大概代码
 
 ```go
 
@@ -348,11 +347,11 @@ func WithTimeout(timeout time.Duration) Option {
 
 ```
 
-如果你不知道的话,具体可以搜索下`functional options pattern golang`
+搜索`functional options pattern golang`可以了解更多
 
 ## 12 介绍了go标准布局
 
-作者安利了`https://github.com/golang-standards/project-layout`
+`https://github.com/golang-standards/project-layout`
 
 ## 13 包名定义
 
@@ -364,13 +363,12 @@ func WithTimeout(timeout time.Duration) Option {
 
 ## 15 代码文档
 
-要写代码文档,并知道go官方的`go doc`工具
-
-这个属于代码规范问题了.
+代码文档很重要,并知道go官方的`go doc`工具.
 
 ## 16 介绍了linter
 
-linter,静态代码检测.
-安利了集成的linter,项目`https://github.com/golangci/golangci-lint`
+linter--静态代码检测.
 
-uber公司的代码规范 `https://github.com/xxjwxc/uber_go_guide_cn`
+集成的linter的项目`https://github.com/golangci/golangci-lint`
+
+> 私人安利,uber公司的代码规范`https://github.com/xxjwxc/uber_go_guide_cn`
