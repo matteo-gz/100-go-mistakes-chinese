@@ -2,7 +2,7 @@
 title: 5. strings
 ---
 
-## 36 不理解rune概念
+## 36 rune概念
 
 - charset
 - encoding,golang使用UTF-8
@@ -19,8 +19,8 @@ s := string([]byte{0xE6, 0xB1, 0x89})
 fmt.Printf("%s\n", s)// 汉
 ```
 
-rune 即 unicode
+rune 即 unicode.
 
-len 返回的byte count
+len 返回的byte count.
 
 ## 37 strings迭代

@@ -49,7 +49,7 @@ fmt.Println(n * n) // 应该是1.00020001
 但是结果是
 > 1.0002
 
-## 20 slice底层结构的理解
+## 20 slice 底层结构
 
 
 即len与cap的关系的理解.
@@ -72,7 +72,7 @@ func convert(foos []Foo) []Bar {
 }
 ```
 
-### 关于append的处理
+**关于append的处理**
 
 偏向可读性做法:
 
@@ -104,7 +104,7 @@ func collectAllUserKeys(cmp Compare, tombstones []tombstoneWithLevel) [][]byte {
 
 2种写法见仁见智,如果调用次数多,成为性能瓶颈情况下.还是为了团队沟通,让代码可读性变高.
 
-## 22 nil与 empty slices 区别
+## 22 slice: nil与 empty slices 区别
 
 - len==0 就是empty slices
 - slice==nil 就是 nil slice
@@ -121,7 +121,7 @@ s = make([]string, 0) // 只是empty
 
 以上区别就是nil是没有内存分配的
 
-### json encode影响
+**json encode影响**
 
 ```go
 var s1 []float32  // nil 
@@ -139,7 +139,7 @@ customer2 := customer{ ID: "bar", Operations: s2, }
 
 > {"ID":"bar","Operations":[]}
 
-## 23 nil处理不当的bug
+## 23 slice: nil处理不当的bug
 
 ```go
 func handleOperations(id string) { 
@@ -175,7 +175,7 @@ func handleOperations(id string) {
 }
 ```
 
-## 24 没有正确copy slice
+## 24 slice: 没有正确copy 
 
 下面例子
 
@@ -218,7 +218,7 @@ output:
 output:
 > dst: [0 1 2]
 
-## 25 append的注意点
+## 25 slice: append的注意点
 
 ```go
 s1 := []int{1, 2, 3}
@@ -268,7 +268,7 @@ f(s[:2:2]) // 即s[0:2:2] cap==2-0 ->2
 // 调用时则不会改动原有的s
 ```
 
-## 26 slice与内存泄漏
+## 26 slice 与内存泄漏
 
 例子 我们调用`consumeMessages`
 
@@ -472,8 +472,8 @@ func randBytes() [128]byte {
 - 每隔一小时复制到新map,丢弃旧map
 - 优化数据类型 `map[int][128]byte`变成`map[int]*[128]byte`,改为指针能节省部分内存
 
-## 29 判断对等关系
+## 29 判断类型等价关系
 
-`==` 不能用于slice map
+`==` 不能用于slice map.
 
-`reflect.DeepEqual()` 可以做到,但是性能很一般
+`reflect.DeepEqual()` 可以做到,但是性能很一般.

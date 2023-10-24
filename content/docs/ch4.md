@@ -2,8 +2,11 @@
 title: 4. 控制结构
 ---
 
-## 30 元素在循环中复制
+## 30 range下元素copy
 
+{{< hint info >}}
+range介绍
+{{< /hint >}}
 `range` 可作用于 `string`, `array`, `指针数组`, `slice`, `map`, 接收`chan`.
 
 复习下range的写法:
@@ -34,8 +37,10 @@ index=1
 index=2
 ```
 
-**开始陷阱挑战**
 
+{{< hint info >}}
+range下值类型
+{{< /hint >}}
 ```go
 accounts := []account{{balance: 100.}, {balance: 200.}, {balance: 300.}}
 for _, a := range accounts {
@@ -47,7 +52,7 @@ fmt.Println(accounts)
 
 > [{100} {200} {300}]
 
-因为我们修改的是拷贝出来的a 原来的slice没有改变到
+因为我们修改的是拷贝出来的a 原来的slice**没有改变到**
 
 下面才是能改变的
 
@@ -70,7 +75,7 @@ accounts[i].balance += 1000
 `accounts := []*account{}`
 作者不是很赞同,在`#91`时会提及
 
-## 31 忽略如何在range循环中计算参数
+## 31 range下元素计算
 
 slice
 
@@ -190,7 +195,7 @@ output
 10
 [0 1 10]
 ```
-## 32 range中的指针元素
+## 32 range下指针元素
 range时临时变量指向同个指针
 ```go
 
@@ -241,7 +246,7 @@ output
 &{3 0}
 ```
 
-## 33 map iterations 相关错误
+## 33 map迭代陷阱
 
 
 
@@ -370,7 +375,7 @@ wanna break for and exit
 im arrive
 
 ```
-## 35 在循环中使用defer
+## 35 在for中使用defer
 
 defer的执行是推入函数的调用栈,在函数**return时才会执行**.
 

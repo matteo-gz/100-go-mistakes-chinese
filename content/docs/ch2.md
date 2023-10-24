@@ -241,7 +241,7 @@ http.HandleFunc("/blog/", redirect)
 - error的handle还是正常的
 - 单元测试没有变复杂
 
-## 4 过渡封装函数来设置变量值
+## 4 设置变量值复杂化
 
 或许你见过这种函数对
 
@@ -262,7 +262,7 @@ func Age(){ // getter
 
 如果前期简单需求,请不要对变量过度封装.
 
-## 5 接口污染
+## 5 interface污染
 
 接口越大,抽象越弱.
 
@@ -276,10 +276,10 @@ func Age(){ // getter
 
 接口也是有CPU消耗成本的.
 
-## 6 接口定义处
+## 6 interface定义处
 接口的定义尽量在消费端,而不是在生产端.
 
-## 7 接口使用规则
+## 7 interface使用规则
 函数返回对象尽量不要用interface,否则别人使用时,需要去看你的代码.
 
 函数入参可以接受interface,宽进严出.
@@ -297,7 +297,7 @@ any使得静态语言变得和动态语言一样,不确定里面的信息.
 
 泛型使用,见仁见智.
 
-## 10 内嵌类型
+## 10 struct内嵌类型
 
 ```go
 type a struct {
@@ -327,7 +327,7 @@ func useA() {
 
 对于`a.c` 还是`a.b.c`,哪种更好,要具体情况具体分析.
 
-## 11 介绍了func option 模式优点
+## 11 设计模式:func option
 
 大概代码
 
@@ -349,15 +349,15 @@ func WithTimeout(timeout time.Duration) Option {
 
 搜索`functional options pattern golang`可以了解更多
 
-## 12 介绍了go标准布局
+## 12 项目布局:go标准布局
 
 `https://github.com/golang-standards/project-layout`
 
-## 13 包名定义
+## 13 package名定义
 
 减少这种`common` `utils` `base`包的定义,这里涉及了代码规范问题,见仁见智.
 
-## 14 包名冲突
+## 14 package名冲突
 
 使用别名解决
 
@@ -365,9 +365,7 @@ func WithTimeout(timeout time.Duration) Option {
 
 代码文档很重要,并知道go官方的`go doc`工具.
 
-## 16 介绍了linter
-
-linter--静态代码检测.
+## 16 linter:静态代码检测
 
 集成的linter的项目`https://github.com/golangci/golangci-lint`
 
