@@ -55,6 +55,8 @@ loopLabel:
 type Customer struct {
 	ID      string
 	Balance float64
+	Age     int
+	Name    string
 }
 
 type Store struct{ m map[string]*Customer }

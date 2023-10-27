@@ -1,11 +1,11 @@
 ---
-title: 3. 数据类型
+title: 03. 数据类型
 ---
 
 
 ## 17 八进制混淆
 
-即代码相对人类可读性而言.
+代码可读性
 
 ```go
 fmt.Println(100 + 010)  //结果 108
@@ -24,7 +24,6 @@ fmt.Println(100+010 == 100+0o10) // true
 ## 18 整数溢出
 
 当一个数据超过范围,每次需要增加额外逻辑来判断处理是否溢出.
-个人觉得是一种损耗,属于数据范围应用不当.
 
 ```go
  var counter int32 = math.MaxInt32
@@ -39,7 +38,7 @@ fmt.Println(100+010 == 100+0o10) // true
 
 ## 19 浮点数理解
 
-具体可以搜索浮点数溢出问题.
+浮点数溢
 
 ```go
 var n float32 = 1.0001
@@ -52,7 +51,7 @@ fmt.Println(n * n) // 应该是1.00020001
 ## 20 slice 底层结构
 
 
-即len与cap的关系的理解.
+len与cap的关系.
 
 ## 21 slice 初始化问题
 
@@ -102,8 +101,6 @@ func collectAllUserKeys(cmp Compare, tombstones []tombstoneWithLevel) [][]byte {
 
 ```
 
-2种写法见仁见智,如果调用次数多,成为性能瓶颈情况下.还是为了团队沟通,让代码可读性变高.
-
 ## 22 slice: nil与 empty slices 区别
 
 - len==0 就是empty slices
@@ -119,7 +116,7 @@ s = []string{} // 只是empty
 s = make([]string, 0) // 只是empty
 ```
 
-以上区别就是nil是没有内存分配的
+nil没有内存分配.
 
 **json encode影响**
 

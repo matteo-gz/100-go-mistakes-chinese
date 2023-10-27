@@ -1,5 +1,5 @@
 ---
-title: 2. 代码与项目组织
+title: 02. 代码与项目组织
 ---
 
 ## 1 变量阴影
@@ -63,14 +63,11 @@ x=10
 
 {{< /tabs >}}
 
-
-
-
 ## 2 代码嵌套
 
 涉及`卫语句`概念.
 
-下面是多层嵌套例子:
+{{< expand "多层嵌套例子" >}}
 ```
 if（it == 活的）{
  
@@ -104,7 +101,7 @@ if（it == 活的）{
 
 }
 ```
-
+{{< /expand >}}
 改成如下精简的:
 
 ```
@@ -243,7 +240,7 @@ http.HandleFunc("/blog/", redirect)
 
 ## 4 设置变量值复杂化
 
-或许你见过这种函数对
+通过函数设置变量
 
 ```go
 func setAge(){ //setter
@@ -254,13 +251,13 @@ func Age(){ // getter
 }
 ```
 
-他们的使用好处是
+优点
 
 - 统一管理
 - 可以在函数内部对变量作出规则限制
 - 很方便植入断点
 
-如果前期简单需求,请不要对变量过度封装.
+若前期需求简单,不要过度设计.
 
 ## 5 interface污染
 
@@ -274,7 +271,7 @@ func Age(){ // getter
 
 不要去设计接口,而是发现他们.
 
-接口也是有CPU消耗成本的.
+接口有CPU消耗成本.
 
 ## 6 interface定义处
 接口的定义尽量在消费端,而不是在生产端.
@@ -287,15 +284,14 @@ func Age(){ // getter
 ## 8 any类型使用
 
 any使得静态语言变得和动态语言一样,不确定里面的信息.
-除非在json encode和decode场景这种,尽量减少用any,因为他代表着信息表征减少.
+
+除非在`json` `encode`和`decode`场景这种,尽量减少用any,因为他代表着信息表征减少.
 
 ## 9 泛型使用
 
-常见:
+场景
 
-- 比如slice里面的元素合并
-
-泛型使用,见仁见智.
+- slice里面的元素合并
 
 ## 10 struct内嵌类型
 
@@ -323,13 +319,11 @@ func useA() {
 }
 ```
 
-`a1.mu.Lock` 这样对于使用者就不会感到迷惑了.
-
-对于`a.c` 还是`a.b.c`,哪种更好,要具体情况具体分析.
+`a1.mu.Lock` 对于使用者不会感到迷惑.
 
 ## 11 设计模式:func option
 
-大概代码
+`functional options pattern golang`
 
 ```go
 
@@ -347,26 +341,24 @@ func WithTimeout(timeout time.Duration) Option {
 
 ```
 
-搜索`functional options pattern golang`可以了解更多
+## 12 项目布局
 
-## 12 项目布局:go标准布局
+go标准布局
 
 `https://github.com/golang-standards/project-layout`
 
 ## 13 package名定义
 
-减少这种`common` `utils` `base`包的定义,这里涉及了代码规范问题,见仁见智.
+减少这种`common` `utils` `base`包名的定义.
 
 ## 14 package名冲突
 
-使用别名解决
+使用别名解决.
 
 ## 15 代码文档
 
-代码文档很重要,并知道go官方的`go doc`工具.
+提及代码文档重要性,推荐go官方的`go doc`工具.
 
-## 16 linter:静态代码检测
+## 16 静态代码检测
 
-集成的linter的项目`https://github.com/golangci/golangci-lint`
-
-> 私人安利,uber公司的代码规范`https://github.com/xxjwxc/uber_go_guide_cn`
+介绍集成的linter的项目`https://github.com/golangci/golangci-lint`
