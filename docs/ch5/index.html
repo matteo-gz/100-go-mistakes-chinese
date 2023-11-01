@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="36 string相关rune概念 # charset encoding,golang使用UTF-8 s := &#34;hello&#34; fmt.Println(len(s)) // 5 s := &#34;汉&#34; fmt.Println(len(s)) // 3 s := string([]byte{0xE6, 0xB1, 0x89}) fmt.Printf(&#34;%s\n&#34;, s)// 汉 rune 即 unicode.
+len 返回的byte count.
+37 strings迭代 # s := &#34;hêllo&#34; for i := range s { fmt.Printf(&#34;position %d: %c\n&#34;, i, s[i]) } fmt.Printf(&#34;len=%d\n&#34;, len(s)) output:
+position 0: h position 1: Ã position 3: l position 4: l position 5: o len=6 改用rune">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:title" content="05. strings" />
+<meta property="og:description" content="36 string相关rune概念 # charset encoding,golang使用UTF-8 s := &#34;hello&#34; fmt.Println(len(s)) // 5 s := &#34;汉&#34; fmt.Println(len(s)) // 3 s := string([]byte{0xE6, 0xB1, 0x89}) fmt.Printf(&#34;%s\n&#34;, s)// 汉 rune 即 unicode.
+len 返回的byte count.
+37 strings迭代 # s := &#34;hêllo&#34; for i := range s { fmt.Printf(&#34;position %d: %c\n&#34;, i, s[i]) } fmt.Printf(&#34;len=%d\n&#34;, len(s)) output:
+position 0: h position 1: Ã position 3: l position 4: l position 5: o len=6 改用rune" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch5/" /><meta property="article:section" content="docs" />
+
+
+<title>05. strings | 100 Go Mistakes</title>
+<link rel="manifest" href="/100-go-mistakes-chinese/manifest.json">
+<link rel="icon" href="/100-go-mistakes-chinese/favicon.png" >
+<link rel="stylesheet" href="/100-go-mistakes-chinese/book.min.33a48f5432973b8ff9a82679d9e45d67f2c15d4399bd2829269455cfe390b5e8.css" integrity="sha256-M6SPVDKXO4/5qCZ52eRdZ/LBXUOZvSgpJpRVz&#43;OQteg=" crossorigin="anonymous">
+  <script defer src="/100-go-mistakes-chinese/flexsearch.min.js"></script>
+  <script defer src="/100-go-mistakes-chinese/en.search.min.78bdc3ae40359d81eeb5bcbaa9ef734adf1f9acfc69db8be04069a56b8557bc6.js" integrity="sha256-eL3DrkA1nYHutby6qe9zSt8fms/Gnbi&#43;BAaaVrhVe8Y=" crossorigin="anonymous"></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/100-go-mistakes-chinese/"><span>100 Go Mistakes</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch1/" class="">01. 易学难精的GO</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch2/" class="">02. 代码与项目组织</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch3/" class="">03. 数据类型</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch4/" class="">04. 控制结构</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch5/" class="active">05. strings</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch6/" class="">06. 函数与方法</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch7/" class="">07. 错误管理</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch8/" class="">08. 基础并发</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch9/" class="">09. 实践并发</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch10/" class="">10. 标准库</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch11/" class="">11. 测试</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch12/" class="">12. 优化</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/100-go-mistakes-chinese/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>05. strings</strong>
+
+  <label for="toc-control">
+    
+    <img src="/100-go-mistakes-chinese/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#36-string相关rune概念">36 string相关rune概念</a></li>
+    <li><a href="#37-strings迭代">37 strings迭代</a></li>
+    <li><a href="#38-string相关trim函数">38 string相关trim函数</a></li>
+    <li><a href="#39-string接连">39 string接连</a></li>
+    <li><a href="#40-string转换">40 string转换</a></li>
+    <li><a href="#41-substrings与内存泄漏">41 substrings与内存泄漏</a></li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h2 id="36-string相关rune概念">
+  36 string相关rune概念
+  <a class="anchor" href="#36-string%e7%9b%b8%e5%85%b3rune%e6%a6%82%e5%bf%b5">#</a>
+</h2>
+<ul>
+<li>charset</li>
+<li>encoding,golang使用UTF-8</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#a6e22e">s</span> <span style="color:#f92672">:=</span> <span style="color:#e6db74">&#34;hello&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(len(<span style="color:#a6e22e">s</span>)) <span style="color:#75715e">// 5
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">s</span> <span style="color:#f92672">:=</span> <span style="color:#e6db74">&#34;汉&#34;</span> 
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(len(<span style="color:#a6e22e">s</span>)) <span style="color:#75715e">// 3
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">s</span> <span style="color:#f92672">:=</span> string([]<span style="color:#66d9ef">byte</span>{<span style="color:#ae81ff">0xE6</span>, <span style="color:#ae81ff">0xB1</span>, <span style="color:#ae81ff">0x89</span>}) 
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;%s\n&#34;</span>, <span style="color:#a6e22e">s</span>)<span style="color:#75715e">// 汉
+</span></span></span></code></pre></div><p>rune 即 unicode.</p>
+<p>len 返回的byte count.</p>
+<h2 id="37-strings迭代">
+  37 strings迭代
+  <a class="anchor" href="#37-strings%e8%bf%ad%e4%bb%a3">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#a6e22e">s</span> <span style="color:#f92672">:=</span> <span style="color:#e6db74">&#34;hêllo&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">s</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;position %d: %c\n&#34;</span>, <span style="color:#a6e22e">i</span>, <span style="color:#a6e22e">s</span>[<span style="color:#a6e22e">i</span>])
+</span></span><span style="display:flex;"><span>} 
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;len=%d\n&#34;</span>, len(<span style="color:#a6e22e">s</span>))
+</span></span></code></pre></div><p>output:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>position 0: h
+</span></span><span style="display:flex;"><span>position 1: Ã
+</span></span><span style="display:flex;"><span>position 3: l
+</span></span><span style="display:flex;"><span>position 4: l
+</span></span><span style="display:flex;"><span>position 5: o
+</span></span><span style="display:flex;"><span>len<span style="color:#f92672">=</span><span style="color:#ae81ff">6</span>
+</span></span></code></pre></div><hr>
+<p>改用rune</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#a6e22e">s</span> <span style="color:#f92672">:=</span> <span style="color:#e6db74">&#34;hêllo&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">runes</span> <span style="color:#f92672">:=</span> []rune(<span style="color:#a6e22e">s</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span>, <span style="color:#a6e22e">r</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">runes</span> {
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;position %d: %c\n&#34;</span>, <span style="color:#a6e22e">i</span>, <span style="color:#a6e22e">r</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;len=%d\n&#34;</span>, len(<span style="color:#a6e22e">runes</span>))
+</span></span></code></pre></div><p>output:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>position 0: h
+</span></span><span style="display:flex;"><span>position 1: ê
+</span></span><span style="display:flex;"><span>position 2: l
+</span></span><span style="display:flex;"><span>position 3: l
+</span></span><span style="display:flex;"><span>position 4: o
+</span></span><span style="display:flex;"><span>len<span style="color:#f92672">=</span><span style="color:#ae81ff">5</span>
+</span></span></code></pre></div><p>string默认在byte数组中的迭代,底层用的UTF-8识别.</p>
+<p>len的计算可以使用<code>utf8.RuneCountInString(s)</code>获取真实rune数.</p>
+<p><code>[]rune(s)</code>的转换并非魔法,使用时产生了运行时计算开销.</p>
+<h2 id="38-string相关trim函数">
+  38 string相关trim函数
+  <a class="anchor" href="#38-string%e7%9b%b8%e5%85%b3trim%e5%87%bd%e6%95%b0">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#a6e22e">strings</span>.<span style="color:#a6e22e">TrimRight</span>(<span style="color:#e6db74">&#34;123oxo&#34;</span>, <span style="color:#e6db74">&#34;xo&#34;</span>))  <span style="color:#75715e">// 123
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#a6e22e">strings</span>.<span style="color:#a6e22e">TrimSuffix</span>(<span style="color:#e6db74">&#34;123oxo&#34;</span>, <span style="color:#e6db74">&#34;xo&#34;</span>)) <span style="color:#75715e">//123o
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#a6e22e">strings</span>.<span style="color:#a6e22e">TrimLeft</span>(<span style="color:#e6db74">&#34;oxo123&#34;</span>, <span style="color:#e6db74">&#34;ox&#34;</span>))   <span style="color:#75715e">// 123
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#a6e22e">strings</span>.<span style="color:#a6e22e">TrimPrefix</span>(<span style="color:#e6db74">&#34;oxo123&#34;</span>, <span style="color:#e6db74">&#34;ox&#34;</span>)) <span style="color:#75715e">/// o123
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#a6e22e">strings</span>.<span style="color:#a6e22e">Trim</span>(<span style="color:#e6db74">&#34;oxo123oxo&#34;</span>, <span style="color:#e6db74">&#34;ox&#34;</span>)) <span style="color:#75715e">// 123
+</span></span></span></code></pre></div><p>具体的函数定义处有详细说明</p>
+<h2 id="39-string接连">
+  39 string接连
+  <a class="anchor" href="#39-string%e6%8e%a5%e8%bf%9e">#</a>
+</h2>
+<p>对于少量字符拼接,保持易读性.
+使用<code>fmt</code> <code>+=</code> 拼接都可以</p>
+<p>对于大量字符,使用builder函数,并且设置grow可有良好的优化.</p>
+<p>写多个拼接函数版本,然后压测即可.上述的只是结论.</p>
+<h2 id="40-string转换">
+  40 string转换
+  <a class="anchor" href="#40-string%e8%bd%ac%e6%8d%a2">#</a>
+</h2>
+<p>很多接口的操作是[]byte操作,改为string操作存在转换消耗.</p>
+<h2 id="41-substrings与内存泄漏">
+  41 substrings与内存泄漏
+  <a class="anchor" href="#41-substrings%e4%b8%8e%e5%86%85%e5%ad%98%e6%b3%84%e6%bc%8f">#</a>
+</h2>
+<p>占据同个内存,可见<a href="../ch3/#26-slice-%e4%b8%8e%e5%86%85%e5%ad%98%e6%b3%84%e6%bc%8f"><code>#26</code></a></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#a6e22e">uuid</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">log</span>[:<span style="color:#ae81ff">36</span>] 
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">store</span>(<span style="color:#a6e22e">uuid</span>)
+</span></span></code></pre></div><p>改为让slice脱离释放</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#a6e22e">uuid</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">strings</span>.<span style="color:#a6e22e">Clone</span>(<span style="color:#a6e22e">log</span>[:<span style="color:#ae81ff">36</span>])
+</span></span></code></pre></div></article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+
+
+  <script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+<div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "https-matteo-gz-github-io" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#36-string相关rune概念">36 string相关rune概念</a></li>
+    <li><a href="#37-strings迭代">37 strings迭代</a></li>
+    <li><a href="#38-string相关trim函数">38 string相关trim函数</a></li>
+    <li><a href="#39-string接连">39 string接连</a></li>
+    <li><a href="#40-string转换">40 string转换</a></li>
+    <li><a href="#41-substrings与内存泄漏">41 substrings与内存泄漏</a></li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

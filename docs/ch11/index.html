@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="82 测试类别 # 分类:
+端到端测试 集成测试 单元测试 构建标记
+//go:build foo package bar 可用于类似go test --tags=integration -v . 来指定运行某些tag测试文件.
+用环境变量选择测试分支执行
+长久运行跳过
+if testing.Short() { t.Skip(&#34;skipping long-running test&#34;) } go test -short -v .
+83 race标记 # 进行数据竞争检测
+go test -race ./... 84 测试执行模式 # t.Parallel()在go test中用于并行执行测试用例
+go test -shuffle=on -v .乱序执行
+85 表格驱动测试 # 可用IDE帮助生成
+86 测试中休眠 # 可用sleep进行测试并发场景.
+87 time API测试 # 比如业务中使用time.Now作为变量,影响了测试.
+需要考虑如何覆盖测试到.
+88 测试包推荐 # https://pkg.go.dev/net/http/httptest
+https://pkg.go.dev/testing/iotest">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:title" content="11. 测试" />
+<meta property="og:description" content="82 测试类别 # 分类:
+端到端测试 集成测试 单元测试 构建标记
+//go:build foo package bar 可用于类似go test --tags=integration -v . 来指定运行某些tag测试文件.
+用环境变量选择测试分支执行
+长久运行跳过
+if testing.Short() { t.Skip(&#34;skipping long-running test&#34;) } go test -short -v .
+83 race标记 # 进行数据竞争检测
+go test -race ./... 84 测试执行模式 # t.Parallel()在go test中用于并行执行测试用例
+go test -shuffle=on -v .乱序执行
+85 表格驱动测试 # 可用IDE帮助生成
+86 测试中休眠 # 可用sleep进行测试并发场景.
+87 time API测试 # 比如业务中使用time.Now作为变量,影响了测试.
+需要考虑如何覆盖测试到.
+88 测试包推荐 # https://pkg.go.dev/net/http/httptest
+https://pkg.go.dev/testing/iotest" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch11/" /><meta property="article:section" content="docs" />
+
+
+<title>11. 测试 | 100 Go Mistakes</title>
+<link rel="manifest" href="/100-go-mistakes-chinese/manifest.json">
+<link rel="icon" href="/100-go-mistakes-chinese/favicon.png" >
+<link rel="stylesheet" href="/100-go-mistakes-chinese/book.min.33a48f5432973b8ff9a82679d9e45d67f2c15d4399bd2829269455cfe390b5e8.css" integrity="sha256-M6SPVDKXO4/5qCZ52eRdZ/LBXUOZvSgpJpRVz&#43;OQteg=" crossorigin="anonymous">
+  <script defer src="/100-go-mistakes-chinese/flexsearch.min.js"></script>
+  <script defer src="/100-go-mistakes-chinese/en.search.min.78bdc3ae40359d81eeb5bcbaa9ef734adf1f9acfc69db8be04069a56b8557bc6.js" integrity="sha256-eL3DrkA1nYHutby6qe9zSt8fms/Gnbi&#43;BAaaVrhVe8Y=" crossorigin="anonymous"></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/100-go-mistakes-chinese/"><span>100 Go Mistakes</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch1/" class="">01. 易学难精的GO</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch2/" class="">02. 代码与项目组织</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch3/" class="">03. 数据类型</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch4/" class="">04. 控制结构</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch5/" class="">05. strings</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch6/" class="">06. 函数与方法</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch7/" class="">07. 错误管理</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch8/" class="">08. 基础并发</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch9/" class="">09. 实践并发</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch10/" class="">10. 标准库</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch11/" class="active">11. 测试</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch12/" class="">12. 优化</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/100-go-mistakes-chinese/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>11. 测试</strong>
+
+  <label for="toc-control">
+    
+    <img src="/100-go-mistakes-chinese/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#82-测试类别">82 测试类别</a></li>
+    <li><a href="#83-race标记">83 race标记</a></li>
+    <li><a href="#84-测试执行模式">84 测试执行模式</a></li>
+    <li><a href="#85-表格驱动测试">85 表格驱动测试</a></li>
+    <li><a href="#86-测试中休眠">86 测试中休眠</a></li>
+    <li><a href="#87-time-api测试">87 time API测试</a></li>
+    <li><a href="#88-测试包推荐">88 测试包推荐</a></li>
+    <li><a href="#89-benchmarks">89 benchmarks</a></li>
+    <li><a href="#90-其他测试功能">90 其他测试功能</a></li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h2 id="82-测试类别">
+  82 测试类别
+  <a class="anchor" href="#82-%e6%b5%8b%e8%af%95%e7%b1%bb%e5%88%ab">#</a>
+</h2>
+<p>分类:</p>
+<ul>
+<li>端到端测试</li>
+<li>集成测试</li>
+<li>单元测试</li>
+</ul>
+<p><strong>构建标记</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#75715e">//go:build foo
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">package</span> <span style="color:#a6e22e">bar</span>
+</span></span></code></pre></div><p>可用于类似<code>go test --tags=integration -v .</code> 来指定运行某些tag测试文件.</p>
+<hr>
+<p>用<strong>环境变量</strong>选择测试分支执行</p>
+<hr>
+<p><strong>长久运行跳过</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">if</span> <span style="color:#a6e22e">testing</span>.<span style="color:#a6e22e">Short</span>() {
+</span></span><span style="display:flex;"><span>	 <span style="color:#a6e22e">t</span>.<span style="color:#a6e22e">Skip</span>(<span style="color:#e6db74">&#34;skipping long-running test&#34;</span>) 
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><code>go test -short -v .</code></p>
+<h2 id="83-race标记">
+  83 race标记
+  <a class="anchor" href="#83-race%e6%a0%87%e8%ae%b0">#</a>
+</h2>
+<p>进行数据竞争检测</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>go test -race ./...
+</span></span></code></pre></div><h2 id="84-测试执行模式">
+  84 测试执行模式
+  <a class="anchor" href="#84-%e6%b5%8b%e8%af%95%e6%89%a7%e8%a1%8c%e6%a8%a1%e5%bc%8f">#</a>
+</h2>
+<p><code>t.Parallel()</code>在go test中用于并行执行测试用例</p>
+<p><code>go test -shuffle=on -v .</code>乱序执行</p>
+<h2 id="85-表格驱动测试">
+  85 表格驱动测试
+  <a class="anchor" href="#85-%e8%a1%a8%e6%a0%bc%e9%a9%b1%e5%8a%a8%e6%b5%8b%e8%af%95">#</a>
+</h2>
+<p>可用IDE帮助生成</p>
+<h2 id="86-测试中休眠">
+  86 测试中休眠
+  <a class="anchor" href="#86-%e6%b5%8b%e8%af%95%e4%b8%ad%e4%bc%91%e7%9c%a0">#</a>
+</h2>
+<p>可用sleep进行测试并发场景.</p>
+<h2 id="87-time-api测试">
+  87 time API测试
+  <a class="anchor" href="#87-time-api%e6%b5%8b%e8%af%95">#</a>
+</h2>
+<p>比如业务中使用<code>time.Now</code>作为变量,影响了测试.</p>
+<p>需要考虑如何覆盖测试到.</p>
+<h2 id="88-测试包推荐">
+  88 测试包推荐
+  <a class="anchor" href="#88-%e6%b5%8b%e8%af%95%e5%8c%85%e6%8e%a8%e8%8d%90">#</a>
+</h2>
+<p><a href="https://pkg.go.dev/net/http/httptest">https://pkg.go.dev/net/http/httptest</a></p>
+<p><a href="https://pkg.go.dev/testing/iotest">https://pkg.go.dev/testing/iotest</a></p>
+<h2 id="89-benchmarks">
+  89 benchmarks
+  <a class="anchor" href="#89-benchmarks">#</a>
+</h2>
+<p><code>b.ResetTimer()</code>可重置benchmarks计时器.</p>
+<p>测试环境机器工作负载会影响benchmarks结果.</p>
+<hr>
+<p>存在编译器优化会影响benchmarks结果,例如被测试函数过于简单被内联inlining.</p>
+<p>内联伪代码</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#75715e">// 原始函数
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">function</span> <span style="color:#a6e22e">add</span>(<span style="color:#a6e22e">a</span>, <span style="color:#a6e22e">b</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">a</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">b</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 主函数调用函数
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">function</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">x</span> = <span style="color:#a6e22e">add</span>(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 经过内联优化后
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">function</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 将add函数定义插入main函数中
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">x</span>; 
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">a</span> = <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">b</span> = <span style="color:#ae81ff">2</span>;  
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">x</span> = <span style="color:#a6e22e">a</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">b</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><hr>
+<p>观察者效应是测试代码自身可能影响到测试对象的行为.</p>
+<h2 id="90-其他测试功能">
+  90 其他测试功能
+  <a class="anchor" href="#90-%e5%85%b6%e4%bb%96%e6%b5%8b%e8%af%95%e5%8a%9f%e8%83%bd">#</a>
+</h2>
+<ul>
+<li>代码覆盖率</li>
+<li>从使用者角度设计测试函数</li>
+<li>编写函数方便测试</li>
+<li>启动与关闭资源函数用于测试初始化</li>
+</ul>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+
+
+  <script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+<div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "https-matteo-gz-github-io" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#82-测试类别">82 测试类别</a></li>
+    <li><a href="#83-race标记">83 race标记</a></li>
+    <li><a href="#84-测试执行模式">84 测试执行模式</a></li>
+    <li><a href="#85-表格驱动测试">85 表格驱动测试</a></li>
+    <li><a href="#86-测试中休眠">86 测试中休眠</a></li>
+    <li><a href="#87-time-api测试">87 time API测试</a></li>
+    <li><a href="#88-测试包推荐">88 测试包推荐</a></li>
+    <li><a href="#89-benchmarks">89 benchmarks</a></li>
+    <li><a href="#90-其他测试功能">90 其他测试功能</a></li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

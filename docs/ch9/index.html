@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="61 context传递错误 # 若一个context变量无法应对多个场景
+新建context.background 建造新context,只传递context values 62 协程何时终止 # goroutine 泄漏
+记得关闭的资源
+HTTP 数据库连接 打开文件 socket 资源的关闭机制
+在main函数执行时,通过context的传递来控制协程,或者defer关闭(作者推荐这个,因为defer保证执行).
+w:=newWatcher() defer w.close() // 在对应的close 触发终止 func (watcher) close (){ // 写上资源的回收 } 63 协程的时序 # 在for循环中不断地创建协程,他们执行的顺序是没有先后的.
+64 select与channels # select与channels搭配保证时序
+select { case v:=&lt;-ch: } 65 信号与channels # chan struct{} 承担信号的变化,减少内存占用和符号意义代表.
+66 nil channels # 利用nil chan阻塞 合并chan消息时,用nil chan避免CPU空转 67 channel size # size为0,易于推理逻辑,同步模式
+size为40,CPU与内存平衡
+size过大要思考crash时场景以及内存占用.
+68 string格式 # 1个协程context更新值;1个协程fmt打印context造成数据竞争,案例:https://github.">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:title" content="09. 实践并发" />
+<meta property="og:description" content="61 context传递错误 # 若一个context变量无法应对多个场景
+新建context.background 建造新context,只传递context values 62 协程何时终止 # goroutine 泄漏
+记得关闭的资源
+HTTP 数据库连接 打开文件 socket 资源的关闭机制
+在main函数执行时,通过context的传递来控制协程,或者defer关闭(作者推荐这个,因为defer保证执行).
+w:=newWatcher() defer w.close() // 在对应的close 触发终止 func (watcher) close (){ // 写上资源的回收 } 63 协程的时序 # 在for循环中不断地创建协程,他们执行的顺序是没有先后的.
+64 select与channels # select与channels搭配保证时序
+select { case v:=&lt;-ch: } 65 信号与channels # chan struct{} 承担信号的变化,减少内存占用和符号意义代表.
+66 nil channels # 利用nil chan阻塞 合并chan消息时,用nil chan避免CPU空转 67 channel size # size为0,易于推理逻辑,同步模式
+size为40,CPU与内存平衡
+size过大要思考crash时场景以及内存占用.
+68 string格式 # 1个协程context更新值;1个协程fmt打印context造成数据竞争,案例:https://github." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch9/" /><meta property="article:section" content="docs" />
+
+
+<title>09. 实践并发 | 100 Go Mistakes</title>
+<link rel="manifest" href="/100-go-mistakes-chinese/manifest.json">
+<link rel="icon" href="/100-go-mistakes-chinese/favicon.png" >
+<link rel="stylesheet" href="/100-go-mistakes-chinese/book.min.33a48f5432973b8ff9a82679d9e45d67f2c15d4399bd2829269455cfe390b5e8.css" integrity="sha256-M6SPVDKXO4/5qCZ52eRdZ/LBXUOZvSgpJpRVz&#43;OQteg=" crossorigin="anonymous">
+  <script defer src="/100-go-mistakes-chinese/flexsearch.min.js"></script>
+  <script defer src="/100-go-mistakes-chinese/en.search.min.78bdc3ae40359d81eeb5bcbaa9ef734adf1f9acfc69db8be04069a56b8557bc6.js" integrity="sha256-eL3DrkA1nYHutby6qe9zSt8fms/Gnbi&#43;BAaaVrhVe8Y=" crossorigin="anonymous"></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/100-go-mistakes-chinese/"><span>100 Go Mistakes</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch1/" class="">01. 易学难精的GO</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch2/" class="">02. 代码与项目组织</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch3/" class="">03. 数据类型</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch4/" class="">04. 控制结构</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch5/" class="">05. strings</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch6/" class="">06. 函数与方法</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch7/" class="">07. 错误管理</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch8/" class="">08. 基础并发</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch9/" class="active">09. 实践并发</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch10/" class="">10. 标准库</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch11/" class="">11. 测试</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch12/" class="">12. 优化</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/100-go-mistakes-chinese/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>09. 实践并发</strong>
+
+  <label for="toc-control">
+    
+    <img src="/100-go-mistakes-chinese/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#61-context传递错误">61 context传递错误</a></li>
+    <li><a href="#62-协程何时终止">62 协程何时终止</a></li>
+    <li><a href="#63-协程的时序">63 协程的时序</a></li>
+    <li><a href="#64-select与channels">64 select与channels</a></li>
+    <li><a href="#65-信号与channels">65 信号与channels</a></li>
+    <li><a href="#66-nil-channels">66 nil channels</a></li>
+    <li><a href="#67-channel-size">67 channel size</a></li>
+    <li><a href="#68-string格式">68 string格式</a></li>
+    <li><a href="#69-data-race与append">69 data race与append</a></li>
+    <li><a href="#70-mutex与map">70 mutex与map</a></li>
+    <li><a href="#71-waitgroup误用">71 waitGroup误用</a></li>
+    <li><a href="#72-synccond">72 sync.Cond</a></li>
+    <li><a href="#73-errgroup">73 errgroup</a></li>
+    <li><a href="#73-复制sync">73 复制sync</a></li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h2 id="61-context传递错误">
+  61 context传递错误
+  <a class="anchor" href="#61-context%e4%bc%a0%e9%80%92%e9%94%99%e8%af%af">#</a>
+</h2>
+<p>若一个context变量无法应对多个场景</p>
+<ul>
+<li>新建context.background</li>
+<li>建造新context,只传递context values</li>
+</ul>
+<h2 id="62-协程何时终止">
+  62 协程何时终止
+  <a class="anchor" href="#62-%e5%8d%8f%e7%a8%8b%e4%bd%95%e6%97%b6%e7%bb%88%e6%ad%a2">#</a>
+</h2>
+<p>goroutine 泄漏</p>
+<p>记得关闭的资源</p>
+<ul>
+<li>HTTP</li>
+<li>数据库连接</li>
+<li>打开文件</li>
+<li>socket</li>
+</ul>
+<p>资源的关闭机制</p>
+<p>在main函数执行时,通过context的传递来控制协程,或者defer关闭(作者推荐这个,因为defer保证执行).</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">w</span><span style="color:#f92672">:=</span><span style="color:#a6e22e">newWatcher</span>()
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">w</span>.close()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 在对应的close 触发终止
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">watcher</span>) <span style="color:#a6e22e">close</span> (){
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// 写上资源的回收
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span></code></pre></div><h2 id="63-协程的时序">
+  63 协程的时序
+  <a class="anchor" href="#63-%e5%8d%8f%e7%a8%8b%e7%9a%84%e6%97%b6%e5%ba%8f">#</a>
+</h2>
+<p>在for循环中不断地创建协程,他们执行的顺序是没有先后的.</p>
+<h2 id="64-select与channels">
+  64 select与channels
+  <a class="anchor" href="#64-select%e4%b8%8echannels">#</a>
+</h2>
+<p>select与channels搭配保证时序</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">select</span> {
+</span></span><span style="display:flex;"><span> <span style="color:#66d9ef">case</span> <span style="color:#a6e22e">v</span><span style="color:#f92672">:=&lt;-</span><span style="color:#a6e22e">ch</span>:
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="65-信号与channels">
+  65 信号与channels
+  <a class="anchor" href="#65-%e4%bf%a1%e5%8f%b7%e4%b8%8echannels">#</a>
+</h2>
+<p><code>chan struct{}</code> 承担信号的变化,减少内存占用和符号意义代表.</p>
+<h2 id="66-nil-channels">
+  66 nil channels
+  <a class="anchor" href="#66-nil-channels">#</a>
+</h2>
+<ul>
+<li>利用nil chan阻塞</li>
+<li>合并chan消息时,用nil chan避免CPU空转</li>
+</ul>
+<h2 id="67-channel-size">
+  67 channel size
+  <a class="anchor" href="#67-channel-size">#</a>
+</h2>
+<p>size为0,易于推理逻辑,同步模式</p>
+<p>size为40,CPU与内存平衡</p>
+<p>size过大要思考crash时场景以及内存占用.</p>
+<h2 id="68-string格式">
+  68 string格式
+  <a class="anchor" href="#68-string%e6%a0%bc%e5%bc%8f">#</a>
+</h2>
+<p>1个协程context更新值;1个协程fmt打印context造成数据竞争,案例:https://github.com/etcd-io/etcd/pull/7816</p>
+<p>fmt 打印结构体时会调用String()接口</p>
+<h2 id="69-data-race与append">
+  69 data race与append
+  <a class="anchor" href="#69-data-race%e4%b8%8eappend">#</a>
+</h2>
+<p>存在多个goroutine append slice操作时导致data race.</p>
+<p>因为slice可能指向同个底层数组,在数据修改时就存在数据竞争.</p>
+<h2 id="70-mutex与map">
+  70 mutex与map
+  <a class="anchor" href="#70-mutex%e4%b8%8emap">#</a>
+</h2>
+<p>在考虑map的data race,确定mutex的边界,在保证线程安全情况下,提高并发程度,减少锁占用时间.</p>
+<h2 id="71-waitgroup误用">
+  71 waitGroup误用
+  <a class="anchor" href="#71-waitgroup%e8%af%af%e7%94%a8">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>(){
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Add</span>(<span style="color:#ae81ff">1</span>) <span style="color:#75715e">//wg的数量存在情况:即由于协程有几率执行比wg.wait慢,从而挂不上.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Done</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Wait</span>()
+</span></span></code></pre></div><p>这种情况下存在bug</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Add</span>(<span style="color:#ae81ff">1</span>) <span style="color:#75715e">// wg的数量已经挂上
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>(){
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Done</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Wait</span>()
+</span></span></code></pre></div><p>以上保证了wg的数量有被挂上,而非goroutine数量过多时,得不到执行.</p>
+<h2 id="72-synccond">
+  72 sync.Cond
+  <a class="anchor" href="#72-synccond">#</a>
+</h2>
+<p>监听balance是否到达goal,mutex的实现例子</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">mu</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">RWMutex</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">//...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// 读锁 监听
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">mu</span>.<span style="color:#a6e22e">RLock</span>()
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">mu</span>.<span style="color:#a6e22e">RUnlock</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> <span style="color:#a6e22e">balance</span>&lt; <span style="color:#a6e22e">goal</span>{ <span style="color:#75715e">// 陷入loop CPU损耗
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#a6e22e">mu</span>.<span style="color:#a6e22e">RUnlock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">mu</span>.<span style="color:#a6e22e">RLock</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;到达&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e">//...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// 写锁 操作数据
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">mu</span>.<span style="color:#a6e22e">Lock</span>()
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">mu</span>.<span style="color:#a6e22e">Unlock</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">balance</span><span style="color:#f92672">++</span>
+</span></span></code></pre></div><p>上述场景,每次去窥探是否到达goal时,一直陷入循环.</p>
+<hr>
+<p>利用chan改造</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#a6e22e">ch</span><span style="color:#f92672">:=</span><span style="color:#a6e22e">make</span> (<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">int</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e">//...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//读取 监听
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">for</span> <span style="color:#a6e22e">balance</span><span style="color:#f92672">:=</span><span style="color:#66d9ef">range</span> <span style="color:#a6e22e">ch</span>{
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">balance</span><span style="color:#f92672">&gt;=</span> <span style="color:#a6e22e">goal</span>{
+</span></span><span style="display:flex;"><span>	    <span style="color:#66d9ef">return</span>	
+</span></span><span style="display:flex;"><span>    }   
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// 写入
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">balance</span><span style="color:#f92672">++</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">ch</span><span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">balance</span>
+</span></span></code></pre></div><p>当写入有变化时,对比第一种方案有所优化.</p>
+<p>但是只能设置一个读取函数,若存在同时监听2个目标时,比如:</p>
+<p>balance与 <code>goal=10</code>, <code>goal=11</code>比较时chan只能被读取一次,下次无法读取了.</p>
+<hr>
+<p>cond 广播机制</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">cond</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">Cond</span>=<span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">NewCond</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">Mutex</span>{})
+</span></span><span style="display:flex;"><span><span style="color:#75715e">//...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// 读监听
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">cond</span>.<span style="color:#a6e22e">L</span>.<span style="color:#a6e22e">Lock</span>()
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">cond</span>.<span style="color:#a6e22e">L</span>.<span style="color:#a6e22e">Unlock</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> <span style="color:#a6e22e">balance</span>&lt;<span style="color:#a6e22e">goal</span> { <span style="color:#75715e">// loop
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#a6e22e">cond</span>.<span style="color:#a6e22e">Wait</span>() <span style="color:#75715e">// 挂起等待唤醒
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;到达&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// 写
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">cond</span>.<span style="color:#a6e22e">L</span>.<span style="color:#a6e22e">Lock</span>()
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">cond</span>.<span style="color:#a6e22e">L</span>.<span style="color:#a6e22e">Unlock</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">balance</span><span style="color:#f92672">++</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">cond</span>.<span style="color:#a6e22e">Broadcast</span>() <span style="color:#75715e">// 广播
+</span></span></span></code></pre></div><p>利用广播,可满足<strong>多个goal设置值监听</strong></p>
+<h2 id="73-errgroup">
+  73 errgroup
+  <a class="anchor" href="#73-errgroup">#</a>
+</h2>
+<p>多goroutine协助,errgroup妙用</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#75715e">//...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#a6e22e">g</span>,<span style="color:#a6e22e">ctx</span><span style="color:#f92672">:=</span><span style="color:#a6e22e">errgroup</span>.<span style="color:#a6e22e">WithContext</span>(<span style="color:#a6e22e">ctx</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> <span style="color:#a6e22e">_</span>,<span style="color:#a6e22e">v</span><span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">data</span>{
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">g</span>.<span style="color:#a6e22e">Go</span>(
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">func</span>()<span style="color:#66d9ef">error</span>{
+</span></span><span style="display:flex;"><span>		    <span style="color:#a6e22e">err</span><span style="color:#f92672">:=</span><span style="color:#a6e22e">xx</span>(<span style="color:#a6e22e">ctx</span>,<span style="color:#a6e22e">v</span>) <span style="color:#75715e">// xx 为业务函数
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>			<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">err</span>
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>	)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">err</span><span style="color:#f92672">:=</span><span style="color:#a6e22e">g</span>.<span style="color:#a6e22e">Wait</span>()
+</span></span></code></pre></div><p>引入errgroup包,使用WithContext来创建一个errgroup,并传入上下文ctx。</p>
+<p>使用errgroup的Go方法,为每个data循环起一个goroutine调用业务函数xx。这里xx函数必须接收ctx作为参数,因为需要<strong>读取ctx中的取消信号</strong>。</p>
+<p>errgroup的Go方法会将每个任务以goroutine的形式运行,并将错误返回替换为errgroup中管理的错误。</p>
+<p>调用errgroup的Wait方法,会<strong>阻塞等待</strong>所有任务完成。如果其中有任务返回错误,则Wait最终会返回<strong>第一个错误</strong>。</p>
+<p>可以在ctx中设置取消信号,此时所有goroutine都会收到取消消息退出。</p>
+<h2 id="73-复制sync">
+  73 复制sync
+  <a class="anchor" href="#73-%e5%a4%8d%e5%88%b6sync">#</a>
+</h2>
+<p><strong>sync包永远不该被复制类型</strong></p>
+<ul>
+<li>sync.Cond</li>
+<li>sync.Map</li>
+<li>sync.Mutex</li>
+<li>sync.RWMutex</li>
+<li>sync.Once</li>
+<li>sync.Pool</li>
+<li>sync.WaitGroup</li>
+</ul>
+<p>案例:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Counter</span> <span style="color:#66d9ef">struct</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">mu</span>       <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">Mutex</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">counters</span> <span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>]<span style="color:#66d9ef">int</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">NewCounter</span>() <span style="color:#a6e22e">Counter</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Counter</span>{<span style="color:#a6e22e">counters</span>: <span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>]<span style="color:#66d9ef">int</span>{}}
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">c</span> <span style="color:#a6e22e">Counter</span>) <span style="color:#a6e22e">Increment</span>(<span style="color:#a6e22e">name</span> <span style="color:#66d9ef">string</span>) {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">mu</span>.<span style="color:#a6e22e">Lock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">mu</span>.<span style="color:#a6e22e">Unlock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">counters</span>[<span style="color:#a6e22e">name</span>]<span style="color:#f92672">++</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">syncCp</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">counter</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">NewCounter</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> &lt; <span style="color:#ae81ff">100</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">counter</span>.<span style="color:#a6e22e">Increment</span>(<span style="color:#e6db74">&#34;foo&#34;</span>)
+</span></span><span style="display:flex;"><span>		}()
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">go</span> <span style="color:#66d9ef">func</span>() {
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">counter</span>.<span style="color:#a6e22e">Increment</span>(<span style="color:#e6db74">&#34;bar&#34;</span>)
+</span></span><span style="display:flex;"><span>		}()
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><code>syncCp</code>调用会</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>fatal error: concurrent map writes
+</span></span></code></pre></div><p>修复方法1:</p>
+<p>IDE提示为</p>
+<blockquote>
+<p>&lsquo;Increment&rsquo; passes a lock by the value: type &lsquo;Counter&rsquo; contains &lsquo;sync.Mutex&rsquo; which is &lsquo;sync.Locker&rsquo;</p>
+</blockquote>
+<p>修复后</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">c</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Counter</span>) <span style="color:#a6e22e">Increment</span>(<span style="color:#a6e22e">name</span> <span style="color:#66d9ef">string</span>) <span style="color:#75715e">//修改为指针接收者
+</span></span></span></code></pre></div><p>修复方法2:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Counter</span> <span style="color:#66d9ef">struct</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">mu</span>       <span style="color:#f92672">*</span><span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">Mutex</span>  <span style="color:#75715e">// 指针类型
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>	<span style="color:#a6e22e">counters</span> <span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>]<span style="color:#66d9ef">int</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">NewCounter</span>() <span style="color:#a6e22e">Counter</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">Counter</span>{
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">counters</span>: <span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>]<span style="color:#66d9ef">int</span>{},
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">mu</span>:       <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">Mutex</span>{}, <span style="color:#75715e">// 指向同个,若此处为nil 也会panic
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div></article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+
+
+  <script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+<div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "https-matteo-gz-github-io" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#61-context传递错误">61 context传递错误</a></li>
+    <li><a href="#62-协程何时终止">62 协程何时终止</a></li>
+    <li><a href="#63-协程的时序">63 协程的时序</a></li>
+    <li><a href="#64-select与channels">64 select与channels</a></li>
+    <li><a href="#65-信号与channels">65 信号与channels</a></li>
+    <li><a href="#66-nil-channels">66 nil channels</a></li>
+    <li><a href="#67-channel-size">67 channel size</a></li>
+    <li><a href="#68-string格式">68 string格式</a></li>
+    <li><a href="#69-data-race与append">69 data race与append</a></li>
+    <li><a href="#70-mutex与map">70 mutex与map</a></li>
+    <li><a href="#71-waitgroup误用">71 waitGroup误用</a></li>
+    <li><a href="#72-synccond">72 sync.Cond</a></li>
+    <li><a href="#73-errgroup">73 errgroup</a></li>
+    <li><a href="#73-复制sync">73 复制sync</a></li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

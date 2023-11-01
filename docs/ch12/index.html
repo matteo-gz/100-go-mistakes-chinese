@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="91 CPU缓存 # CPU架构 i5-7300 2个物理内核,4个逻辑内核. graph TD subgraph CPU subgraph core0 C0_T0[T0] C0_T1[T1] C0_L1D[L1D] C0_L1I[L1I] C0_L2[L2] C0_T0 &lt;--&gt;C0_L1D C0_T0 &lt;--&gt;C0_L1I C0_T1 &lt;--&gt;C0_L1D C0_T1 &lt;--&gt;C0_L1I C0_L1D&lt;--&gt;C0_L2 C0_L1I&lt;--&gt;C0_L2 end subgraph core1 T0 &lt;--&gt; L1D T0 &lt;--&gt; L1I T1 &lt;--&gt; L1D T1 &lt;--&gt; L1I L1D&lt;--&gt;L2 L1I&lt;--&gt;L2 end L2&lt;--&gt;L3 C0_L2&lt;--&gt;L3 end m1[Main memory] L3 &lt;--&gt; m1 cache大小
+L1: 64KB L2: 256KB L3: 4MB 访问速度.
+L1: 1ns L2: 1/4 L1速度 L3: 1/10 L1速度 主存: 1/50~1/100 L1速度 L1 可以挂上100个变量,推算关系&ndash;L1存储大小/变量大小=变量数量.">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:title" content="12. 优化" />
+<meta property="og:description" content="91 CPU缓存 # CPU架构 i5-7300 2个物理内核,4个逻辑内核. graph TD subgraph CPU subgraph core0 C0_T0[T0] C0_T1[T1] C0_L1D[L1D] C0_L1I[L1I] C0_L2[L2] C0_T0 &lt;--&gt;C0_L1D C0_T0 &lt;--&gt;C0_L1I C0_T1 &lt;--&gt;C0_L1D C0_T1 &lt;--&gt;C0_L1I C0_L1D&lt;--&gt;C0_L2 C0_L1I&lt;--&gt;C0_L2 end subgraph core1 T0 &lt;--&gt; L1D T0 &lt;--&gt; L1I T1 &lt;--&gt; L1D T1 &lt;--&gt; L1I L1D&lt;--&gt;L2 L1I&lt;--&gt;L2 end L2&lt;--&gt;L3 C0_L2&lt;--&gt;L3 end m1[Main memory] L3 &lt;--&gt; m1 cache大小
+L1: 64KB L2: 256KB L3: 4MB 访问速度.
+L1: 1ns L2: 1/4 L1速度 L3: 1/10 L1速度 主存: 1/50~1/100 L1速度 L1 可以挂上100个变量,推算关系&ndash;L1存储大小/变量大小=变量数量." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch12/" /><meta property="article:section" content="docs" />
+
+
+<title>12. 优化 | 100 Go Mistakes</title>
+<link rel="manifest" href="/100-go-mistakes-chinese/manifest.json">
+<link rel="icon" href="/100-go-mistakes-chinese/favicon.png" >
+<link rel="stylesheet" href="/100-go-mistakes-chinese/book.min.33a48f5432973b8ff9a82679d9e45d67f2c15d4399bd2829269455cfe390b5e8.css" integrity="sha256-M6SPVDKXO4/5qCZ52eRdZ/LBXUOZvSgpJpRVz&#43;OQteg=" crossorigin="anonymous">
+  <script defer src="/100-go-mistakes-chinese/flexsearch.min.js"></script>
+  <script defer src="/100-go-mistakes-chinese/en.search.min.78bdc3ae40359d81eeb5bcbaa9ef734adf1f9acfc69db8be04069a56b8557bc6.js" integrity="sha256-eL3DrkA1nYHutby6qe9zSt8fms/Gnbi&#43;BAaaVrhVe8Y=" crossorigin="anonymous"></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/100-go-mistakes-chinese/"><span>100 Go Mistakes</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch1/" class="">01. 易学难精的GO</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch2/" class="">02. 代码与项目组织</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch3/" class="">03. 数据类型</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch4/" class="">04. 控制结构</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch5/" class="">05. strings</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch6/" class="">06. 函数与方法</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch7/" class="">07. 错误管理</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch8/" class="">08. 基础并发</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch9/" class="">09. 实践并发</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch10/" class="">10. 标准库</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch11/" class="">11. 测试</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch12/" class="active">12. 优化</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/100-go-mistakes-chinese/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>12. 优化</strong>
+
+  <label for="toc-control">
+    
+    <img src="/100-go-mistakes-chinese/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#91-cpu缓存">91 CPU缓存</a></li>
+    <li><a href="#92-错误共享">92 错误共享</a></li>
+    <li><a href="#93-指令并行">93 指令并行</a></li>
+    <li><a href="#94-数据对齐">94 数据对齐</a></li>
+    <li><a href="#95-堆栈">95 堆栈</a></li>
+    <li><a href="#96-降低内存分配">96 降低内存分配</a></li>
+    <li><a href="#97-内联">97 内联</a></li>
+    <li><a href="#98-profiling">98 profiling</a></li>
+    <li><a href="#99-垃圾回收">99 垃圾回收</a></li>
+    <li><a href="#100-k8s调度">100 k8s调度</a></li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h2 id="91-cpu缓存">
+  91 CPU缓存
+  <a class="anchor" href="#91-cpu%e7%bc%93%e5%ad%98">#</a>
+</h2>
+<blockquote class="book-hint info">
+  CPU架构
+</blockquote>
+
+<p>i5-7300
+2个物理内核,4个逻辑内核.
+
+
+<script src="/100-go-mistakes-chinese/mermaid.min.js"></script>
+
+  <script>mermaid.initialize({
+  "flowchart": {
+    "useMaxWidth":true
+  },
+  "theme": "default"
+}
+)</script>
+
+
+
+
+<p class="mermaid">
+graph TD
+subgraph CPU
+
+subgraph core0
+C0_T0[T0]
+C0_T1[T1]
+C0_L1D[L1D]
+C0_L1I[L1I]
+C0_L2[L2]
+
+C0_T0 <-->C0_L1D
+C0_T0 <-->C0_L1I
+C0_T1 <-->C0_L1D
+C0_T1 <-->C0_L1I
+
+C0_L1D<-->C0_L2
+C0_L1I<-->C0_L2
+end
+
+subgraph core1
+
+T0 <--> L1D
+T0 <--> L1I
+T1 <--> L1D
+T1 <--> L1I
+
+L1D<-->L2
+L1I<-->L2
+end
+
+L2<-->L3
+C0_L2<-->L3
+
+end
+
+m1[Main memory]
+L3 <--> m1
+
+</p>
+</p>
+<p>cache大小</p>
+<ul>
+<li>L1: 64KB</li>
+<li>L2: 256KB</li>
+<li>L3: 4MB</li>
+</ul>
+<p>访问速度.</p>
+<ul>
+<li>L1: 1ns</li>
+<li>L2: 1/4 L1速度</li>
+<li>L3: 1/10 L1速度</li>
+<li>主存: 1/50~1/100 L1速度</li>
+</ul>
+<p>L1 可以挂上100个变量,推算关系&ndash;L1存储大小/变量大小=变量数量.</p>
+<blockquote class="book-hint info">
+  缓存行相关
+</blockquote>
+
+<p>访问特定内存位置时</p>
+<ul>
+<li>同位置再次引用</li>
+<li>附近内存位置将被引用</li>
+</ul>
+<p><strong>同位置再次引用</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">int</span> a <span style="color:#f92672">=</span> arr[<span style="color:#ae81ff">0</span>]; 
+</span></span><span style="display:flex;"><span><span style="color:#75715e">//代码运算
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">int</span> b <span style="color:#f92672">=</span> arr[<span style="color:#ae81ff">0</span>];
+</span></span></code></pre></div><blockquote>
+<p>第二次访问arr[0]时,数据仍在CPU缓存中,直接从缓存中获取,速度更快.</p>
+</blockquote>
+<p><strong>附近内存位置将被引用</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">int</span> a <span style="color:#f92672">=</span> arr[<span style="color:#ae81ff">0</span>];
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> b <span style="color:#f92672">=</span> arr[<span style="color:#ae81ff">1</span>]; 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> c <span style="color:#f92672">=</span> arr[<span style="color:#ae81ff">2</span>];
+</span></span></code></pre></div><p>访问arr[0],会同时读入arr[0]-arr[N]到缓存.</p>
+<p>以上为局部性原理体现.
+<blockquote class="book-hint info">
+  slice与结构体
+</blockquote>
+</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Foo</span> <span style="color:#66d9ef">struct</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">a</span> <span style="color:#66d9ef">int64</span> 
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">b</span> <span style="color:#66d9ef">int64</span> 
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Bar</span> <span style="color:#66d9ef">struct</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">a</span> []<span style="color:#66d9ef">int64</span> 
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">b</span> []<span style="color:#66d9ef">int64</span> 
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>在sum(a)计算中,<code>Bar</code>比<code>[]Foo</code>紧凑.</p>
+<p>大概分布</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># []Foo</span>
+</span></span><span style="display:flex;"><span>a b a b a b a b
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Bar</span>
+</span></span><span style="display:flex;"><span>a a a a b b b b 
+</span></span></code></pre></div><blockquote class="book-hint info">
+  预测性
+</blockquote>
+
+<p>CPU stride // CPU在连续访问内存地址时,两个地址之间的间隔大小. 大概CPU步幅意思.</p>
+<p>CPU stride类型</p>
+<ul>
+<li>unit stride 可预测</li>
+<li>constant stride 可预测但低效</li>
+<li>non-unit stride 不可预测</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">node</span> <span style="color:#66d9ef">struct</span> { 
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">value</span> <span style="color:#66d9ef">int64</span> 
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">next</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">node</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>node是链表,node.value的sum计算就是constant stride类型.</p>
+<p>[]int64的sum计算就是unit stride类型.
+<blockquote class="book-hint info">
+  Cache placement policy
+</blockquote>
+
+当CPU决定复制内存块并将其放入缓存时,遵守的策略.</p>
+<p>常见策略</p>
+<ul>
+<li>Fully associative</li>
+<li>Set associative</li>
+</ul>
+<p>Set associative比较主流,如下图所示.</p>
+
+
+<p class="mermaid">
+
+graph TD
+A[内存地址] --> B(索引)
+B --> C{组选择}
+C --> D1[组1块1]
+C --> D2[组1块2]
+C --> D3[组1块3]
+C --> D4[组2块1]
+C --> D5[组2块2]
+
+</p>
+
+<h2 id="92-错误共享">
+  92 错误共享
+  <a class="anchor" href="#92-%e9%94%99%e8%af%af%e5%85%b1%e4%ba%ab">#</a>
+</h2>
+<p>多个协程处理时,结构体padding作用.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Result</span> <span style="color:#66d9ef">struct</span> { 
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">sumA</span> <span style="color:#66d9ef">int64</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">_</span> [<span style="color:#ae81ff">56</span>]<span style="color:#66d9ef">byte</span> 
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">sumB</span> <span style="color:#66d9ef">int64</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>如果没有padding</p>
+<ul>
+<li>sumA和sumB可能共享一个Cache line,读写时可能发生Cache冲突</li>
+<li>保存sumA结果时会污染sumB所在Cache line的数据</li>
+<li>读取sumB时更高概率需要从内存重新加载Cache</li>
+</ul>
+<p>padding存在优化内存对齐和Cache利用率.</p>
+<h2 id="93-指令并行">
+  93 指令并行
+  <a class="anchor" href="#93-%e6%8c%87%e4%bb%a4%e5%b9%b6%e8%a1%8c">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">add</span>(<span style="color:#a6e22e">s</span> [<span style="color:#ae81ff">2</span>]<span style="color:#66d9ef">int64</span>) [<span style="color:#ae81ff">2</span>]<span style="color:#66d9ef">int64</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> &lt; <span style="color:#a6e22e">n</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">s</span>[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">++</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">s</span>[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">%</span><span style="color:#ae81ff">2</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">s</span>[<span style="color:#ae81ff">1</span>]<span style="color:#f92672">++</span>
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">s</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">add2</span>(<span style="color:#a6e22e">s</span> [<span style="color:#ae81ff">2</span>]<span style="color:#66d9ef">int64</span>) [<span style="color:#ae81ff">2</span>]<span style="color:#66d9ef">int64</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> &lt; <span style="color:#a6e22e">n</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">v</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">s</span>[<span style="color:#ae81ff">0</span>] <span style="color:#75715e">// v的存在降低读写冲突
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>		<span style="color:#a6e22e">s</span>[<span style="color:#ae81ff">0</span>] = <span style="color:#a6e22e">v</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">v</span><span style="color:#f92672">%</span><span style="color:#ae81ff">2</span> <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">s</span>[<span style="color:#ae81ff">1</span>]<span style="color:#f92672">++</span>
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">s</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>add2的优化让存在instruction-level parallelism (ILP)特性的CPU对其优化.</p>
+<h2 id="94-数据对齐">
+  94 数据对齐
+  <a class="anchor" href="#94-%e6%95%b0%e6%8d%ae%e5%af%b9%e9%bd%90">#</a>
+</h2>
+<ul>
+<li>byte, uint8, int8: <strong>1 byte</strong></li>
+<li>uint16, int16: <strong>2 bytes</strong></li>
+<li>uint32, int32, float32: <strong>4 bytes</strong></li>
+<li>uint64, int64, float64, complex64: <strong>8 bytes</strong></li>
+<li>complex128: <strong>16 bytes</strong></li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Foo</span> <span style="color:#66d9ef">struct</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">b1</span> <span style="color:#66d9ef">byte</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">i</span> <span style="color:#66d9ef">int64</span> 
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">b2</span> <span style="color:#66d9ef">byte</span> 
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>优化后</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Foo</span> <span style="color:#66d9ef">struct</span> { 
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">i</span> <span style="color:#66d9ef">int64</span> 
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">b1</span> <span style="color:#66d9ef">byte</span> 
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">b2</span> <span style="color:#66d9ef">byte</span> 
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="95-堆栈">
+  95 堆栈
+  <a class="anchor" href="#95-%e5%a0%86%e6%a0%88">#</a>
+</h2>
+<p>stack特点</p>
+<ul>
+<li>last-in, first-out (LIFO)</li>
+</ul>
+<p>heap上的变量规则</p>
+<ul>
+<li>全局变量</li>
+<li>发送chan的指针变量</li>
+<li>chan值里面的结构体嵌套指针</li>
+<li>局部变量过大时</li>
+<li>无法预估变量大小</li>
+</ul>
+<h2 id="96-降低内存分配">
+  96 降低内存分配
+  <a class="anchor" href="#96-%e9%99%8d%e4%bd%8e%e5%86%85%e5%ad%98%e5%88%86%e9%85%8d">#</a>
+</h2>
+<p>设计接口时考虑到逃逸分析</p>
+<p>sync.Pool有利于对象重用</p>
+<h2 id="97-内联">
+  97 内联
+  <a class="anchor" href="#97-%e5%86%85%e8%81%94">#</a>
+</h2>
+<p>函数过于复杂则不会内联.</p>
+<h2 id="98-profiling">
+  98 profiling
+  <a class="anchor" href="#98-profiling">#</a>
+</h2>
+<p>Golang性能剖析</p>
+<h2 id="99-垃圾回收">
+  99 垃圾回收
+  <a class="anchor" href="#99-%e5%9e%83%e5%9c%be%e5%9b%9e%e6%94%b6">#</a>
+</h2>
+<p>GC流程</p>
+<ul>
+<li>mark</li>
+<li>sweep</li>
+</ul>
+<p><code>GOGC</code>参数控制触发GC的频率,值越大触发GC的频率越低</p>
+<p>频繁GC与延迟有关.</p>
+<h2 id="100-k8s调度">
+  100 k8s调度
+  <a class="anchor" href="#100-k8s%e8%b0%83%e5%ba%a6">#</a>
+</h2>
+<p>golang应用跑在k8s,在cpu调度上目前存在问题.</p>
+<p>k8s目前的调度策略 <code>Completely Fair Scheduler (CFS)</code></p>
+<p>配置k8s配置上cpu CFS的参数</p>
+<ul>
+<li>cpu.cfs_period_us (global setting)</li>
+<li>cpu.cfs_quota_us (setting per Pod)</li>
+</ul>
+<p><code>https://github.com/golang/go/issues/33803</code> 提出了相关的问题,</p>
+<p>其中 <code>https://github.com/uber-go/automaxprocs</code> 让 <code>GOMAXPROCS</code> 自动根据 CPU 配额进行配置.</p>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+
+
+  <script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+<div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "https-matteo-gz-github-io" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#91-cpu缓存">91 CPU缓存</a></li>
+    <li><a href="#92-错误共享">92 错误共享</a></li>
+    <li><a href="#93-指令并行">93 指令并行</a></li>
+    <li><a href="#94-数据对齐">94 数据对齐</a></li>
+    <li><a href="#95-堆栈">95 堆栈</a></li>
+    <li><a href="#96-降低内存分配">96 降低内存分配</a></li>
+    <li><a href="#97-内联">97 内联</a></li>
+    <li><a href="#98-profiling">98 profiling</a></li>
+    <li><a href="#99-垃圾回收">99 垃圾回收</a></li>
+    <li><a href="#100-k8s调度">100 k8s调度</a></li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

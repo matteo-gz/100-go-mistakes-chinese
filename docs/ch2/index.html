@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="1 变量阴影 # package main import &#34;fmt&#34; func main() { // 外部作用域变量 x := 10 // 这是一个新的代码块，内部作用域 { // 在内部作用域中重名了一个变量x x := 5 fmt.Println(&#34;内部作用域中的x:&#34;, x) // 输出：内部作用域中的x: 5 } // 注意：外部作用域中的变量x没有被修改，因为它被内部作用域中的x所掩盖 fmt.Println(&#34;外部作用域中的x:&#34;, x) // 输出：外部作用域中的x: 10 } 运行之后output:
+内部作用域中的x: 5
+外部作用域中的x: 10
+解决办法 IDE GoLand 能识别这个风险,新作用域内的x变量会变成绿色字体. 临时变量 用一个临时变量tmpX来过渡,防止2个地方的x变量指向的混淆.
+x:=10 { tmpX:=5 x=tmpX } 不用:= 要么不用:=
+var x int x=10 { x=5 } 2 代码嵌套 # 涉及卫语句概念.
+多层嵌套例子 ↕ if（it == 活的）{ if（it == 人）{ if（it ！= 女人）{ return 不喜欢； } else { return 喜欢； } } else { return 不喜欢； } } else { return 不喜欢； } 改成如下精简的:">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:title" content="02. 代码与项目组织" />
+<meta property="og:description" content="1 变量阴影 # package main import &#34;fmt&#34; func main() { // 外部作用域变量 x := 10 // 这是一个新的代码块，内部作用域 { // 在内部作用域中重名了一个变量x x := 5 fmt.Println(&#34;内部作用域中的x:&#34;, x) // 输出：内部作用域中的x: 5 } // 注意：外部作用域中的变量x没有被修改，因为它被内部作用域中的x所掩盖 fmt.Println(&#34;外部作用域中的x:&#34;, x) // 输出：外部作用域中的x: 10 } 运行之后output:
+内部作用域中的x: 5
+外部作用域中的x: 10
+解决办法 IDE GoLand 能识别这个风险,新作用域内的x变量会变成绿色字体. 临时变量 用一个临时变量tmpX来过渡,防止2个地方的x变量指向的混淆.
+x:=10 { tmpX:=5 x=tmpX } 不用:= 要么不用:=
+var x int x=10 { x=5 } 2 代码嵌套 # 涉及卫语句概念.
+多层嵌套例子 ↕ if（it == 活的）{ if（it == 人）{ if（it ！= 女人）{ return 不喜欢； } else { return 喜欢； } } else { return 不喜欢； } } else { return 不喜欢； } 改成如下精简的:" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch2/" /><meta property="article:section" content="docs" />
+
+
+<title>02. 代码与项目组织 | 100 Go Mistakes</title>
+<link rel="manifest" href="/100-go-mistakes-chinese/manifest.json">
+<link rel="icon" href="/100-go-mistakes-chinese/favicon.png" >
+<link rel="stylesheet" href="/100-go-mistakes-chinese/book.min.33a48f5432973b8ff9a82679d9e45d67f2c15d4399bd2829269455cfe390b5e8.css" integrity="sha256-M6SPVDKXO4/5qCZ52eRdZ/LBXUOZvSgpJpRVz&#43;OQteg=" crossorigin="anonymous">
+  <script defer src="/100-go-mistakes-chinese/flexsearch.min.js"></script>
+  <script defer src="/100-go-mistakes-chinese/en.search.min.78bdc3ae40359d81eeb5bcbaa9ef734adf1f9acfc69db8be04069a56b8557bc6.js" integrity="sha256-eL3DrkA1nYHutby6qe9zSt8fms/Gnbi&#43;BAaaVrhVe8Y=" crossorigin="anonymous"></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/100-go-mistakes-chinese/"><span>100 Go Mistakes</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch1/" class="">01. 易学难精的GO</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch2/" class="active">02. 代码与项目组织</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch3/" class="">03. 数据类型</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch4/" class="">04. 控制结构</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch5/" class="">05. strings</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch6/" class="">06. 函数与方法</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch7/" class="">07. 错误管理</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch8/" class="">08. 基础并发</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch9/" class="">09. 实践并发</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch10/" class="">10. 标准库</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch11/" class="">11. 测试</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch12/" class="">12. 优化</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/100-go-mistakes-chinese/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>02. 代码与项目组织</strong>
+
+  <label for="toc-control">
+    
+    <img src="/100-go-mistakes-chinese/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-变量阴影">1 变量阴影</a></li>
+    <li><a href="#2-代码嵌套">2 代码嵌套</a></li>
+    <li><a href="#3-init函数使用场景">3 init函数使用场景</a></li>
+    <li><a href="#4-设置变量值复杂化">4 设置变量值复杂化</a></li>
+    <li><a href="#5-interface污染">5 interface污染</a></li>
+    <li><a href="#6-interface定义处">6 interface定义处</a></li>
+    <li><a href="#7-interface使用规则">7 interface使用规则</a></li>
+    <li><a href="#8-any类型使用">8 any类型使用</a></li>
+    <li><a href="#9-泛型使用">9 泛型使用</a></li>
+    <li><a href="#10-struct内嵌类型">10 struct内嵌类型</a></li>
+    <li><a href="#11-设计模式func-option">11 设计模式:func option</a></li>
+    <li><a href="#12-项目布局">12 项目布局</a></li>
+    <li><a href="#13-package名定义">13 package名定义</a></li>
+    <li><a href="#14-package名冲突">14 package名冲突</a></li>
+    <li><a href="#15-代码文档">15 代码文档</a></li>
+    <li><a href="#16-静态代码检测">16 静态代码检测</a></li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h2 id="1-变量阴影">
+  1 变量阴影
+  <a class="anchor" href="#1-%e5%8f%98%e9%87%8f%e9%98%b4%e5%bd%b1">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> <span style="color:#e6db74">&#34;fmt&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span> <span style="color:#75715e">// 外部作用域变量
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span> <span style="color:#a6e22e">x</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">10</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span> <span style="color:#75715e">// 这是一个新的代码块，内部作用域
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// 在内部作用域中重名了一个变量x
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#a6e22e">x</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;内部作用域中的x:&#34;</span>, <span style="color:#a6e22e">x</span>) <span style="color:#75715e">// 输出：内部作用域中的x: 5
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span> }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span> <span style="color:#75715e">// 注意：外部作用域中的变量x没有被修改，因为它被内部作用域中的x所掩盖
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span> <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;外部作用域中的x:&#34;</span>, <span style="color:#a6e22e">x</span>) <span style="color:#75715e">// 输出：外部作用域中的x: 10
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span></code></pre></div><p>运行之后output:</p>
+<blockquote>
+<p>内部作用域中的x: 5</p>
+<p>外部作用域中的x: 10</p>
+</blockquote>
+<p><blockquote class="book-hint info">
+  解决办法
+</blockquote>
+
+IDE GoLand 能识别这个风险,新作用域内的x变量会变成绿色字体.
+<img src="../ch2.png" alt="绿色变量" /></p>
+
+
+
+
+<div class="book-tabs"><input type="radio" class="toggle" name="tabs-uniqueid" id="tabs-uniqueid-0" checked="checked" />
+  <label for="tabs-uniqueid-0">临时变量</label>
+  <div class="book-tabs-content markdown-inner"><p>用一个临时变量tmpX来过渡,防止2个地方的<code>x</code>变量指向的混淆.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#a6e22e">x</span><span style="color:#f92672">:=</span><span style="color:#ae81ff">10</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span> <span style="color:#a6e22e">tmpX</span><span style="color:#f92672">:=</span><span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span> <span style="color:#a6e22e">x</span>=<span style="color:#a6e22e">tmpX</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div></div><input type="radio" class="toggle" name="tabs-uniqueid" id="tabs-uniqueid-1"  />
+  <label for="tabs-uniqueid-1">不用:=</label>
+  <div class="book-tabs-content markdown-inner"><p>要么不用<code>:=</code></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">x</span> <span style="color:#66d9ef">int</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">x</span>=<span style="color:#ae81ff">10</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span> <span style="color:#a6e22e">x</span>=<span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div></div></div>
+
+<h2 id="2-代码嵌套">
+  2 代码嵌套
+  <a class="anchor" href="#2-%e4%bb%a3%e7%a0%81%e5%b5%8c%e5%a5%97">#</a>
+</h2>
+<p>涉及<code>卫语句</code>概念.</p>
+<p>
+<div class="book-expand">
+  <label>
+    <div class="book-expand-head flex justify-between">
+      <span>多层嵌套例子</span>
+      <span>↕</span>
+    </div>
+    <input type="checkbox" class="hidden" />
+    <div class="book-expand-content markdown-inner">
+      <pre tabindex="0"><code>if（it == 活的）{
+ 
+
+    if（it == 人）{
+ 
+
+        if（it ！= 女人）{
+ 
+
+            return 不喜欢；
+
+        } else {
+ 
+
+            return 喜欢；
+
+        }
+
+    } else {
+ 
+
+        return 不喜欢；
+
+    }
+
+} else {
+ 
+
+    return 不喜欢；
+
+}
+</code></pre>
+    </div>
+  </label>
+</div>
+
+改成如下精简的:</p>
+<pre tabindex="0"><code>if （it ！= 活的）{return 不喜欢}
+
+if（it！=人）{return 不喜欢}
+
+if（it！=女人）{return 不喜欢}
+
+if（it == 女人 &amp;&amp; it == 活的） {return 喜欢}
+
+if（其他任何情况）{return 不喜欢}
+</code></pre><h2 id="3-init函数使用场景">
+  3 init函数使用场景
+  <a class="anchor" href="#3-init%e5%87%bd%e6%95%b0%e4%bd%bf%e7%94%a8%e5%9c%ba%e6%99%af">#</a>
+</h2>
+<blockquote class="book-hint info">
+  init与其他函数执行顺序
+</blockquote>
+
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> <span style="color:#e6db74">&#34;fmt&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">va</span> = <span style="color:#66d9ef">func</span>() <span style="color:#66d9ef">int</span> {
+</span></span><span style="display:flex;"><span> <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;var&#34;</span>)
+</span></span><span style="display:flex;"><span> <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>}()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">init</span>() {
+</span></span><span style="display:flex;"><span> <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;init&#34;</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span> <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;main&#34;</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>output:</p>
+<blockquote>
+<p>var</p>
+<p>init</p>
+<p>main</p>
+</blockquote>
+<blockquote class="book-hint info">
+  多个包的init函数执行顺序
+</blockquote>
+
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>(){
+</span></span><span style="display:flex;"><span> <span style="color:#a6e22e">redis</span>.<span style="color:#a6e22e">xx</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>先载入redis的init,然后是main的init.</p>
+<blockquote class="book-hint info">
+  import多个包的顺序
+</blockquote>
+
+<p>import多个包时,根据文件字母顺序载入init,比如<code>b.go</code>,<code>a.go</code>.
+先执行<code>a.go</code>的init.</p>
+<blockquote class="book-hint info">
+  多次定义init函数
+</blockquote>
+
+<p>init函数可以多处定义.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">init</span>() {
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;init&#34;</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">init</span>() {
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#e6db74">&#34;init2&#34;</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>先执行第一个init.</p>
+<blockquote class="book-hint info">
+  初始化其他包的init
+</blockquote>
+
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#f92672">import</span> (
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">_</span> <span style="color:#e6db74">&#34;foo&#34;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><p>上面例子中foo包的init被执行了.
+<blockquote class="book-hint info">
+  init函数无法被其他函数调用
+</blockquote>
+</p>
+<hr>
+<p><strong>使用场景</strong></p>
+<p>反例:</p>
+<p>数据库连接例子写在init函数里可能是不合适的.</p>
+<pre tabindex="0"><code>// 伪代码
+var db *DB
+
+fun init(){
+    db，err=xx()
+    if err!=nil{
+        painc 
+    }
+}
+</code></pre><ul>
+<li>init函数没有返回值,只能panic去中断,而数据库返回的error,只能暴力处理</li>
+<li>考虑到单元测试场景,init是首次被加载的,包里的函数不是每个测试时都需要数据库连接这个依赖项</li>
+<li>使得变量全局化了,过于暴露了数据库这个变量</li>
+</ul>
+<p>正例</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">init</span>(){
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">HandleFunc</span>(<span style="color:#e6db74">&#34;/blog/&#34;</span>, <span style="color:#a6e22e">redirect</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><ul>
+<li>error的handle还是正常的</li>
+<li>单元测试没有变复杂</li>
+</ul>
+<h2 id="4-设置变量值复杂化">
+  4 设置变量值复杂化
+  <a class="anchor" href="#4-%e8%ae%be%e7%bd%ae%e5%8f%98%e9%87%8f%e5%80%bc%e5%a4%8d%e6%9d%82%e5%8c%96">#</a>
+</h2>
+<p>通过函数设置变量</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">setAge</span>(){ <span style="color:#75715e">//setter
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span> 
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">Age</span>(){ <span style="color:#75715e">// getter
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span> 
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>优点</p>
+<ul>
+<li>统一管理</li>
+<li>可以在函数内部对变量作出规则限制</li>
+<li>很方便植入断点</li>
+</ul>
+<p>若前期需求简单,不要过度设计.</p>
+<h2 id="5-interface污染">
+  5 interface污染
+  <a class="anchor" href="#5-interface%e6%b1%a1%e6%9f%93">#</a>
+</h2>
+<p>接口越大,抽象越弱.</p>
+<p>定义接口规则</p>
+<ul>
+<li>共同行为</li>
+<li>解耦合</li>
+<li>约束行为</li>
+</ul>
+<p>不要去设计接口,而是发现他们.</p>
+<p>接口有CPU消耗成本.</p>
+<h2 id="6-interface定义处">
+  6 interface定义处
+  <a class="anchor" href="#6-interface%e5%ae%9a%e4%b9%89%e5%a4%84">#</a>
+</h2>
+<p>接口的定义尽量在消费端,而不是在生产端.</p>
+<h2 id="7-interface使用规则">
+  7 interface使用规则
+  <a class="anchor" href="#7-interface%e4%bd%bf%e7%94%a8%e8%a7%84%e5%88%99">#</a>
+</h2>
+<p>函数返回对象尽量不要用interface,否则别人使用时,需要去看你的代码.</p>
+<p>函数入参可以接受interface,宽进严出.</p>
+<h2 id="8-any类型使用">
+  8 any类型使用
+  <a class="anchor" href="#8-any%e7%b1%bb%e5%9e%8b%e4%bd%bf%e7%94%a8">#</a>
+</h2>
+<p>any使得静态语言变得和动态语言一样,不确定里面的信息.</p>
+<p>除非在<code>json</code> <code>encode</code>和<code>decode</code>场景这种,尽量减少用any,因为他代表着信息表征减少.</p>
+<h2 id="9-泛型使用">
+  9 泛型使用
+  <a class="anchor" href="#9-%e6%b3%9b%e5%9e%8b%e4%bd%bf%e7%94%a8">#</a>
+</h2>
+<p>场景</p>
+<ul>
+<li>slice里面的元素合并</li>
+</ul>
+<h2 id="10-struct内嵌类型">
+  10 struct内嵌类型
+  <a class="anchor" href="#10-struct%e5%86%85%e5%b5%8c%e7%b1%bb%e5%9e%8b">#</a>
+</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">a</span> <span style="color:#66d9ef">struct</span> {
+</span></span><span style="display:flex;"><span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">Mutex</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">useA</span>() {
+</span></span><span style="display:flex;"><span> <span style="color:#a6e22e">a1</span> <span style="color:#f92672">:=</span> new(<span style="color:#a6e22e">a</span>)
+</span></span><span style="display:flex;"><span> <span style="color:#a6e22e">a1</span>.<span style="color:#a6e22e">Lock</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><code>a1.Lock</code> 对于使用者过于迷惑.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">a</span> <span style="color:#66d9ef">struct</span> {
+</span></span><span style="display:flex;"><span> <span style="color:#a6e22e">mu</span> <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">Mutex</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">useA</span>() {
+</span></span><span style="display:flex;"><span> <span style="color:#a6e22e">a1</span> <span style="color:#f92672">:=</span> new(<span style="color:#a6e22e">a</span>)
+</span></span><span style="display:flex;"><span> <span style="color:#a6e22e">a1</span>.<span style="color:#a6e22e">mu</span>.<span style="color:#a6e22e">Lock</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><code>a1.mu.Lock</code> 对于使用者不会感到迷惑.</p>
+<h2 id="11-设计模式func-option">
+  11 设计模式:func option
+  <a class="anchor" href="#11-%e8%ae%be%e8%ae%a1%e6%a8%a1%e5%bc%8ffunc-option">#</a>
+</h2>
+<p><code>functional options pattern golang</code></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">WithPort</span>(<span style="color:#a6e22e">port</span> <span style="color:#66d9ef">int</span>) <span style="color:#a6e22e">Option</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">s</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Server</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">port</span> = <span style="color:#a6e22e">port</span>
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">WithTimeout</span>(<span style="color:#a6e22e">timeout</span> <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Duration</span>) <span style="color:#a6e22e">Option</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">s</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Server</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">timeout</span> = <span style="color:#a6e22e">timeout</span>
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="12-项目布局">
+  12 项目布局
+  <a class="anchor" href="#12-%e9%a1%b9%e7%9b%ae%e5%b8%83%e5%b1%80">#</a>
+</h2>
+<p>go标准布局</p>
+<p><code>https://github.com/golang-standards/project-layout</code></p>
+<h2 id="13-package名定义">
+  13 package名定义
+  <a class="anchor" href="#13-package%e5%90%8d%e5%ae%9a%e4%b9%89">#</a>
+</h2>
+<p>减少这种<code>common</code> <code>utils</code> <code>base</code>包名的定义.</p>
+<h2 id="14-package名冲突">
+  14 package名冲突
+  <a class="anchor" href="#14-package%e5%90%8d%e5%86%b2%e7%aa%81">#</a>
+</h2>
+<p>使用别名解决.</p>
+<h2 id="15-代码文档">
+  15 代码文档
+  <a class="anchor" href="#15-%e4%bb%a3%e7%a0%81%e6%96%87%e6%a1%a3">#</a>
+</h2>
+<p>提及代码文档重要性,推荐go官方的<code>go doc</code>工具.</p>
+<h2 id="16-静态代码检测">
+  16 静态代码检测
+  <a class="anchor" href="#16-%e9%9d%99%e6%80%81%e4%bb%a3%e7%a0%81%e6%a3%80%e6%b5%8b">#</a>
+</h2>
+<p>介绍集成的linter的项目<code>https://github.com/golangci/golangci-lint</code></p>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+
+
+  <script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+<div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "https-matteo-gz-github-io" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-变量阴影">1 变量阴影</a></li>
+    <li><a href="#2-代码嵌套">2 代码嵌套</a></li>
+    <li><a href="#3-init函数使用场景">3 init函数使用场景</a></li>
+    <li><a href="#4-设置变量值复杂化">4 设置变量值复杂化</a></li>
+    <li><a href="#5-interface污染">5 interface污染</a></li>
+    <li><a href="#6-interface定义处">6 interface定义处</a></li>
+    <li><a href="#7-interface使用规则">7 interface使用规则</a></li>
+    <li><a href="#8-any类型使用">8 any类型使用</a></li>
+    <li><a href="#9-泛型使用">9 泛型使用</a></li>
+    <li><a href="#10-struct内嵌类型">10 struct内嵌类型</a></li>
+    <li><a href="#11-设计模式func-option">11 设计模式:func option</a></li>
+    <li><a href="#12-项目布局">12 项目布局</a></li>
+    <li><a href="#13-package名定义">13 package名定义</a></li>
+    <li><a href="#14-package名冲突">14 package名冲突</a></li>
+    <li><a href="#15-代码文档">15 代码文档</a></li>
+    <li><a href="#16-静态代码检测">16 静态代码检测</a></li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

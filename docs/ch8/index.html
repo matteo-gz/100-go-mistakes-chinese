@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content=" 55 并发与并行 # 并行即同一时刻,多道任务同时处理.
+并发是交替执行,表现在一段时间内完成了多个任务.
+56 调度的成本 # golang协程成本. 文中提及调度原理.
+57 chan 与 mutex # 搭配使用
+58 data race # 多个协程计数器增加时,发生data race, 可用sync/atomic,或者mutex,chan
+59 工作负载与并发 # 工作负载因素
+CPU速度 I/O速度 可用内存 上述因素下并发场景的设计
+60 context # 功能
+deadline time.Duration // 从开始持续的时间,比如250 ms time.Time// 时间节点,比如2022-02-02 00:00:00 UTC 取消信号 context values context.done ">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:title" content="08. 基础并发" />
+<meta property="og:description" content=" 55 并发与并行 # 并行即同一时刻,多道任务同时处理.
+并发是交替执行,表现在一段时间内完成了多个任务.
+56 调度的成本 # golang协程成本. 文中提及调度原理.
+57 chan 与 mutex # 搭配使用
+58 data race # 多个协程计数器增加时,发生data race, 可用sync/atomic,或者mutex,chan
+59 工作负载与并发 # 工作负载因素
+CPU速度 I/O速度 可用内存 上述因素下并发场景的设计
+60 context # 功能
+deadline time.Duration // 从开始持续的时间,比如250 ms time.Time// 时间节点,比如2022-02-02 00:00:00 UTC 取消信号 context values context.done " />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch8/" /><meta property="article:section" content="docs" />
+
+
+<title>08. 基础并发 | 100 Go Mistakes</title>
+<link rel="manifest" href="/100-go-mistakes-chinese/manifest.json">
+<link rel="icon" href="/100-go-mistakes-chinese/favicon.png" >
+<link rel="stylesheet" href="/100-go-mistakes-chinese/book.min.33a48f5432973b8ff9a82679d9e45d67f2c15d4399bd2829269455cfe390b5e8.css" integrity="sha256-M6SPVDKXO4/5qCZ52eRdZ/LBXUOZvSgpJpRVz&#43;OQteg=" crossorigin="anonymous">
+  <script defer src="/100-go-mistakes-chinese/flexsearch.min.js"></script>
+  <script defer src="/100-go-mistakes-chinese/en.search.min.78bdc3ae40359d81eeb5bcbaa9ef734adf1f9acfc69db8be04069a56b8557bc6.js" integrity="sha256-eL3DrkA1nYHutby6qe9zSt8fms/Gnbi&#43;BAaaVrhVe8Y=" crossorigin="anonymous"></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/100-go-mistakes-chinese/"><span>100 Go Mistakes</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <ul>
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch1/" class="">01. 易学难精的GO</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch2/" class="">02. 代码与项目组织</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch3/" class="">03. 数据类型</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch4/" class="">04. 控制结构</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch5/" class="">05. strings</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch6/" class="">06. 函数与方法</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch7/" class="">07. 错误管理</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch8/" class="active">08. 基础并发</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch9/" class="">09. 实践并发</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch10/" class="">10. 标准库</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch11/" class="">11. 测试</a>
+  
+
+        </li>
+      
+    
+      
+        <li>
+          
+  
+  
+
+  
+    <a href="/100-go-mistakes-chinese/docs/ch12/" class="">12. 优化</a>
+  
+
+        </li>
+      
+    
+  </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/100-go-mistakes-chinese/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>08. 基础并发</strong>
+
+  <label for="toc-control">
+    
+    <img src="/100-go-mistakes-chinese/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#55-并发与并行">55 并发与并行</a></li>
+    <li><a href="#56-调度的成本">56 调度的成本</a></li>
+    <li><a href="#57-chan-与-mutex">57 chan 与 mutex</a></li>
+    <li><a href="#58-data-race">58 data race</a></li>
+    <li><a href="#59-工作负载与并发">59 工作负载与并发</a></li>
+    <li><a href="#60-context">60 context</a></li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h2 id="55-并发与并行">
+  55 并发与并行
+  <a class="anchor" href="#55-%e5%b9%b6%e5%8f%91%e4%b8%8e%e5%b9%b6%e8%a1%8c">#</a>
+</h2>
+<p>并行即同一时刻,多道任务同时处理.</p>
+<p>并发是交替执行,表现在一段时间内完成了多个任务.</p>
+<h2 id="56-调度的成本">
+  56 调度的成本
+  <a class="anchor" href="#56-%e8%b0%83%e5%ba%a6%e7%9a%84%e6%88%90%e6%9c%ac">#</a>
+</h2>
+<p>golang协程成本. 文中提及调度原理.</p>
+<h2 id="57-chan-与-mutex">
+  57 chan 与 mutex
+  <a class="anchor" href="#57-chan-%e4%b8%8e-mutex">#</a>
+</h2>
+<p>搭配使用</p>
+<h2 id="58-data-race">
+  58 data race
+  <a class="anchor" href="#58-data-race">#</a>
+</h2>
+<p>多个协程计数器增加时,发生data race,
+可用<code>sync/atomic</code>,或者<code>mutex</code>,<code>chan</code></p>
+<h2 id="59-工作负载与并发">
+  59 工作负载与并发
+  <a class="anchor" href="#59-%e5%b7%a5%e4%bd%9c%e8%b4%9f%e8%bd%bd%e4%b8%8e%e5%b9%b6%e5%8f%91">#</a>
+</h2>
+<p>工作负载因素</p>
+<ul>
+<li>CPU速度</li>
+<li>I/O速度</li>
+<li>可用内存</li>
+</ul>
+<p>上述因素下并发场景的设计</p>
+<h2 id="60-context">
+  60 context
+  <a class="anchor" href="#60-context">#</a>
+</h2>
+<p>功能</p>
+<ul>
+<li>deadline
+<ul>
+<li>time.Duration // 从开始持续的时间,比如250 ms</li>
+<li>time.Time// 时间节点,比如2022-02-02 00:00:00 UTC</li>
+</ul>
+</li>
+<li>取消信号</li>
+<li>context values</li>
+<li>context.done</li>
+</ul>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+
+
+  <script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+<div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "https-matteo-gz-github-io" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#55-并发与并行">55 并发与并行</a></li>
+    <li><a href="#56-调度的成本">56 调度的成本</a></li>
+    <li><a href="#57-chan-与-mutex">57 chan 与 mutex</a></li>
+    <li><a href="#58-data-race">58 data race</a></li>
+    <li><a href="#59-工作负载与并发">59 工作负载与并发</a></li>
+    <li><a href="#60-context">60 context</a></li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Docs on 100 Go Mistakes</title>
+    <link>https://matteo-gz.github.io/100-go-mistakes-chinese/docs/</link>
+    <description>Recent content in Docs on 100 Go Mistakes</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language><atom:link href="https://matteo-gz.github.io/100-go-mistakes-chinese/docs/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>01. 易学难精的GO</title>
+      <link>https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch1/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch1/</guid>
+      <description>go官方的答疑 https://go.dev/doc/faq
+go语言的特征
+简单 简洁表达 编译速度快 安全 go的犯错归类
+漏洞 画蛇添足,提高无必要代码复杂度 他人难解读的代码 不良好的代码组织方式 缺乏API封装 欠缺代码优化 缺乏生产力 </description>
+    </item>
+    
+    <item>
+      <title>02. 代码与项目组织</title>
+      <link>https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch2/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch2/</guid>
+      <description>1 变量阴影 # package main import &amp;#34;fmt&amp;#34; func main() { // 外部作用域变量 x := 10 // 这是一个新的代码块，内部作用域 { // 在内部作用域中重名了一个变量x x := 5 fmt.Println(&amp;#34;内部作用域中的x:&amp;#34;, x) // 输出：内部作用域中的x: 5 } // 注意：外部作用域中的变量x没有被修改，因为它被内部作用域中的x所掩盖 fmt.Println(&amp;#34;外部作用域中的x:&amp;#34;, x) // 输出：外部作用域中的x: 10 } 运行之后output:
+内部作用域中的x: 5
+外部作用域中的x: 10
+解决办法 IDE GoLand 能识别这个风险,新作用域内的x变量会变成绿色字体. 临时变量 用一个临时变量tmpX来过渡,防止2个地方的x变量指向的混淆.
+x:=10 { tmpX:=5 x=tmpX } 不用:= 要么不用:=
+var x int x=10 { x=5 } 2 代码嵌套 # 涉及卫语句概念.
+多层嵌套例子 ↕ if（it == 活的）{ if（it == 人）{ if（it ！= 女人）{ return 不喜欢； } else { return 喜欢； } } else { return 不喜欢； } } else { return 不喜欢； } 改成如下精简的:</description>
+    </item>
+    
+    <item>
+      <title>03. 数据类型</title>
+      <link>https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch3/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch3/</guid>
+      <description>17 八进制混淆 # 代码可读性
+fmt.Println(100 + 010) //结果 108 fmt.Println(100 + 0o10) //结果 108 fmt.Println(100+010 == 100+0o10) // true 八进制表达最好用0o前缀.
+二进制用0b前缀.
+十六进制用0x前缀.
+虚数 使用i后缀,例如 3i.
+18 整数溢出 # 当一个数据超过范围,每次需要增加额外逻辑来判断处理是否溢出.
+var counter int32 = math.MaxInt32 fmt.Printf(&amp;#34;counter=%d\n&amp;#34;, counter) counter++ fmt.Printf(&amp;#34;counter=%d\n&amp;#34;, counter) counter=2147483647
+counter=-2147483648
+19 浮点数理解 # 浮点数溢
+var n float32 = 1.0001 fmt.Println(n * n) // 应该是1.00020001 但是结果是
+1.0002
+20 slice 底层结构 # len与cap的关系.
+21 slice 初始化问题 # func convert(foos []Foo) []Bar { // 第一种低效的 bars := make([]Bar, 0) // 第二种高效的 n := len(foos) bars := make([]Bar, 0, n) // 因为不知道slice里面的元素数量,如果slice过大则需要多次扩容 for _, foo := range foos { bars = append(bars, fooToBar(foo)) } return bars } 关于append的处理</description>
+    </item>
+    
+    <item>
+      <title>04. 控制结构</title>
+      <link>https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch4/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch4/</guid>
+      <description>30 range下元素copy # range介绍 range 可作用于 string, array, 指针数组, slice, map, 接收chan.
+复习下range的写法:
+s := []string{&amp;#34;a&amp;#34;, &amp;#34;b&amp;#34;, &amp;#34;c&amp;#34;} for i, v := range s { fmt.Printf(&amp;#34;index=%d, value=%s\n&amp;#34;, i, v) } for _, v := range s { fmt.Printf(&amp;#34;value=%s\n&amp;#34;, v) } for i := range s { fmt.Printf(&amp;#34;index=%d\n&amp;#34;, i) } output:
+index=0, value=a index=1, value=b index=2, value=c value=a value=b value=c index=0 index=1 index=2 range下值类型 accounts := []account{{balance: 100.}, {balance: 200.}, {balance: 300.</description>
+    </item>
+    
+    <item>
+      <title>05. strings</title>
+      <link>https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch5/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch5/</guid>
+      <description>36 string相关rune概念 # charset encoding,golang使用UTF-8 s := &amp;#34;hello&amp;#34; fmt.Println(len(s)) // 5 s := &amp;#34;汉&amp;#34; fmt.Println(len(s)) // 3 s := string([]byte{0xE6, 0xB1, 0x89}) fmt.Printf(&amp;#34;%s\n&amp;#34;, s)// 汉 rune 即 unicode.
+len 返回的byte count.
+37 strings迭代 # s := &amp;#34;hêllo&amp;#34; for i := range s { fmt.Printf(&amp;#34;position %d: %c\n&amp;#34;, i, s[i]) } fmt.Printf(&amp;#34;len=%d\n&amp;#34;, len(s)) output:
+position 0: h position 1: Ã position 3: l position 4: l position 5: o len=6 改用rune</description>
+    </item>
+    
+    <item>
+      <title>06. 函数与方法</title>
+      <link>https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch6/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch6/</guid>
+      <description>42 接收者与指针 # 没有改变原始数据
+func (c customer) add(v float64) { c.balance += v } 改变原始数据
+func (c *customer) add(operation float64) { c.balance += operation } 43 返回值进行命名 # getCoordinates(address string) (float32, float32, error) 更为清晰
+getCoordinates(address string) (lat, lng float32, err error) 44 返回值非预期 # 忘记赋值err,导致err是nil
+func returnAlwaysNil(ctx context.Context) (err error) { if ctx.Err() != nil { return err } return nil } error被覆盖,本来期望返回&amp;quot;new err&amp;quot;
+func returnErrCover(ctx context.Context) (err error) { err = errors.</description>
+    </item>
+    
+    <item>
+      <title>07. 错误管理</title>
+      <link>https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch7/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch7/</guid>
+      <description>48 panic # panic与recover机制
+何时panic场景,举例
+net/http 包中存在header code越界panic database/sql中 register函数,若driver nil 为panic 49 错误修饰 # 用法
+fmt.Errorf(&amp;quot;%w&amp;quot;,err) 可显示源错误,用于errors.Is判断 fmt.Errorf(&amp;quot;%v&amp;quot;,err) 不显示源错误 // 一个原始错误 underlying := errors.New(&amp;#34;underlying error&amp;#34;) // 使用 %w 报告原始错误 wrapped := fmt.Errorf(&amp;#34;%w&amp;#34;, underlying) // wrapped 会包含原始错误的信息 fmt.Println(&amp;#34;wrapped:&amp;#34;, wrapped) // underlying error // 检查 wrapped 是否包含原始错误 if errors.Is(wrapped, underlying) { fmt.Println(&amp;#34;%w 报告原始错误&amp;#34;) } 场景
+遮罩错误,向用户展示人性化提示,并记录错误上下文 叠加错误,多个失败堆叠 50 错误类型检查 # errors.As 可用于类型判断
+err := DoSomething() if errors.As(err, &amp;amp;MyError{}); err != nil { // err implements MyError handleMyError(err) } else { // err does not implement MyError handleGenericError(err) } 51 检查错误值不准确 # fmt.</description>
+    </item>
+    
+    <item>
+      <title>08. 基础并发</title>
+      <link>https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch8/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch8/</guid>
+      <description> 55 并发与并行 # 并行即同一时刻,多道任务同时处理.
+并发是交替执行,表现在一段时间内完成了多个任务.
+56 调度的成本 # golang协程成本. 文中提及调度原理.
+57 chan 与 mutex # 搭配使用
+58 data race # 多个协程计数器增加时,发生data race, 可用sync/atomic,或者mutex,chan
+59 工作负载与并发 # 工作负载因素
+CPU速度 I/O速度 可用内存 上述因素下并发场景的设计
+60 context # 功能
+deadline time.Duration // 从开始持续的时间,比如250 ms time.Time// 时间节点,比如2022-02-02 00:00:00 UTC 取消信号 context values context.done </description>
+    </item>
+    
+    <item>
+      <title>09. 实践并发</title>
+      <link>https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch9/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch9/</guid>
+      <description>61 context传递错误 # 若一个context变量无法应对多个场景
+新建context.background 建造新context,只传递context values 62 协程何时终止 # goroutine 泄漏
+记得关闭的资源
+HTTP 数据库连接 打开文件 socket 资源的关闭机制
+在main函数执行时,通过context的传递来控制协程,或者defer关闭(作者推荐这个,因为defer保证执行).
+w:=newWatcher() defer w.close() // 在对应的close 触发终止 func (watcher) close (){ // 写上资源的回收 } 63 协程的时序 # 在for循环中不断地创建协程,他们执行的顺序是没有先后的.
+64 select与channels # select与channels搭配保证时序
+select { case v:=&amp;lt;-ch: } 65 信号与channels # chan struct{} 承担信号的变化,减少内存占用和符号意义代表.
+66 nil channels # 利用nil chan阻塞 合并chan消息时,用nil chan避免CPU空转 67 channel size # size为0,易于推理逻辑,同步模式
+size为40,CPU与内存平衡
+size过大要思考crash时场景以及内存占用.
+68 string格式 # 1个协程context更新值;1个协程fmt打印context造成数据竞争,案例:https://github.</description>
+    </item>
+    
+    <item>
+      <title>10. 标准库</title>
+      <link>https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch10/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch10/</guid>
+      <description>75 提供错误的time duration # 没有单位写法会带来误导.
+ticker := time.NewTicker(1000) 附带单位
+ticker := time.NewTicker(1000 * time.Nanosecond) 76 time.After内存泄漏 # func f1(ch &amp;lt;-chan int) { for { select { case event := &amp;lt;-ch: fmt.Println(event) case &amp;lt;-time.After(time.Hour): log.Println(&amp;#34;warning: no messages received&amp;#34;) } } } 每次走select分支都是新创建time.After,time.After里面包裹着chan且要等待1小时候释放.
+修复问题
+func f3(ch &amp;lt;-chan int) { for { ctx, cancel := context.WithTimeout(context.Background(), time.Hour) select { case event := &amp;lt;-ch: cancel() // chan得到释放 fmt.Println(event) case &amp;lt;-ctx.Done(): log.Println(&amp;#34;warning: no messages received&amp;#34;) } } } 或者最佳实践(因为变量复用)</description>
+    </item>
+    
+    <item>
+      <title>11. 测试</title>
+      <link>https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch11/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch11/</guid>
+      <description>82 测试类别 # 分类:
+端到端测试 集成测试 单元测试 构建标记
+//go:build foo package bar 可用于类似go test --tags=integration -v . 来指定运行某些tag测试文件.
+用环境变量选择测试分支执行
+长久运行跳过
+if testing.Short() { t.Skip(&amp;#34;skipping long-running test&amp;#34;) } go test -short -v .
+83 race标记 # 进行数据竞争检测
+go test -race ./... 84 测试执行模式 # t.Parallel()在go test中用于并行执行测试用例
+go test -shuffle=on -v .乱序执行
+85 表格驱动测试 # 可用IDE帮助生成
+86 测试中休眠 # 可用sleep进行测试并发场景.
+87 time API测试 # 比如业务中使用time.Now作为变量,影响了测试.
+需要考虑如何覆盖测试到.
+88 测试包推荐 # https://pkg.go.dev/net/http/httptest
+https://pkg.go.dev/testing/iotest</description>
+    </item>
+    
+    <item>
+      <title>12. 优化</title>
+      <link>https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch12/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://matteo-gz.github.io/100-go-mistakes-chinese/docs/ch12/</guid>
+      <description>91 CPU缓存 # CPU架构 i5-7300 2个物理内核,4个逻辑内核. graph TD subgraph CPU subgraph core0 C0_T0[T0] C0_T1[T1] C0_L1D[L1D] C0_L1I[L1I] C0_L2[L2] C0_T0 &lt;--&gt;C0_L1D C0_T0 &lt;--&gt;C0_L1I C0_T1 &lt;--&gt;C0_L1D C0_T1 &lt;--&gt;C0_L1I C0_L1D&lt;--&gt;C0_L2 C0_L1I&lt;--&gt;C0_L2 end subgraph core1 T0 &lt;--&gt; L1D T0 &lt;--&gt; L1I T1 &lt;--&gt; L1D T1 &lt;--&gt; L1I L1D&lt;--&gt;L2 L1I&lt;--&gt;L2 end L2&lt;--&gt;L3 C0_L2&lt;--&gt;L3 end m1[Main memory] L3 &lt;--&gt; m1 cache大小
+L1: 64KB L2: 256KB L3: 4MB 访问速度.
+L1: 1ns L2: 1/4 L1速度 L3: 1/10 L1速度 主存: 1/50~1/100 L1速度 L1 可以挂上100个变量,推算关系&amp;ndash;L1存储大小/变量大小=变量数量.</description>
+    </item>
+    
+  </channel>
+</rss>
